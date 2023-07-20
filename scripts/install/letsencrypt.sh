@@ -19,7 +19,7 @@ fi
 ip=$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')
 
 if [[ -z $LE_HOSTNAME ]]; then
-    echo_query "Enter domain name to secure with LE"
+    echo_query "Enter domain name to secure with Zero SSL"
     read -e hostname
 else
     hostname=$LE_HOSTNAME
@@ -33,6 +33,15 @@ if [[ -z $LE_DEFAULTCONF ]]; then
     fi
 else
     main=$LE_DEFAULTCONF
+fi
+
+if [[ -z $ZS_EAB ]]; then
+    echo_query "Enter EAB-KID from Zero SSL"
+    read -e ZS_EAB
+fi
+if [[ -z $ZS_HMAC ]]; then
+    echo_query "Enter HMAC-Key from Zero SSL"
+    read -e ZS_HMAC
 fi
 
 if [[ $main == yes ]]; then
@@ -133,18 +142,25 @@ fi
 mkdir -p /etc/nginx/ssl/${hostname}
 chmod 700 /etc/nginx/ssl
 
-/root/.acme.sh/acme.sh --set-default-ca --server letsencrypt >> $log 2>&1 || {
-    echo_warn "Could not set default certificate authority to Let's Encrypt. Upgrading acme.sh to retry."
+/root/.acme.sh/acme.sh --set-default-ca --server zerossl >> $log 2>&1 || {
+    echo_warn "Could not set default certificate authority to Zero SSL. Upgrading acme.sh to retry."
     /root/.acme.sh/acme.sh --upgrade >> $log 2>&1 || {
         echo_error "Could not upgrade acme.sh."
         exit 1
     }
-    /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt >> $log 2>&1 || {
-        echo_error "Could not set default certificate authority to Let's Encrypt"
+    /root/.acme.sh/acme.sh --set-default-ca --server zerossl >> $log 2>&1 || {
+        echo_error "Could not set default certificate authority to Zero SSL"
         exit 1
     }
     echo_info "acme.sh has been upgraded successfully."
 }
+
+echo_progress_start "Registering account"
+    /root/.acme/acme.sh --register-account --server zerossl --eab-kid ZS_EAB --eab-hmac-key ZS_HMAC >> $log 2>&1 || {
+        echo_error "Failed to register account"
+        exit 1
+    }
+    echo_info "Account registered"
 
 echo_progress_start "Registering certificates"
 if [[ ${cf} == yes ]]; then
@@ -191,4 +207,4 @@ fi
 
 systemctl reload nginx
 
-echo_success "Letsencrypt installed"
+echo_success "Zero SSL installed"
