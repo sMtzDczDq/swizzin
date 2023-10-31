@@ -3,3 +3,4 @@ enable=avoid-nullary-conditions
 enable=avoid-deprecate-which
 enable=avoid-quote-safe-variables
 disable=SC2068 # Double quote array expansions to avoid re-splitting elements.
+external-sources=true
