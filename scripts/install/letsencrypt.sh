@@ -14,13 +14,14 @@ if [[ ! -f /install/.nginx.lock ]]; then
     echo_error "This script is meant to be used in conjunction with nginx and it has not been installed. Please install nginx first and restart this installer."
     exit 1
 fi
-# shellcheck source=/Users/mitch/projects/swizzin/sources/functions/letsencrypt
+env
+set -x
 . /etc/swizzin/sources/functions/letsencrypt
 ip=$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')
 
 if [[ -z $LE_HOSTNAME ]]; then
     echo_query "Enter domain name to secure with Zero SSL"
-    read -err hostname
+    read -e hostname
 else
     hostname=$LE_HOSTNAME
 fi
@@ -37,11 +38,11 @@ fi
 
 if [[ -z $ZS_EAB ]]; then
     echo_query "Enter EAB-KID from Zero SSL. Go to https://app.zerossl.com/developer"
-    read -er ZS_EAB
+    read -e ZS_EAB
 fi
 if [[ -z $ZS_HMAC ]]; then
     echo_query "Enter HMAC-Key from Zero SSL"
-    read -err ZS_HMAC
+    read -e ZS_HMAC
 fi
 
 if [[ $main == yes ]]; then
@@ -87,14 +88,14 @@ if [[ ${cf} == yes ]]; then
 
     if [[ -z $LE_CF_API ]]; then
         echo_query "Enter CF API key"
-        read -er api
+        read -e api
     else
         api=$LE_CF_API
     fi
 
     if [[ -z $LE_CF_EMAIL ]]; then
         echo_query "CF Email"
-        read -er email
+        read -e email
     else
         api=$LE_CF_EMAIL
     fi
@@ -113,7 +114,7 @@ if [[ ${cf} == yes ]]; then
 
         if [[ -z $LE_CF_ZONE ]]; then
             echo_query "Zone Name (example.com)"
-            read -er zone
+            read -e zone
         else
             zone=$LE_CF_ZONE
         fi
@@ -135,20 +136,20 @@ apt_install socat
 
 if [[ ! -f /root/.acme.sh/acme.sh ]]; then
     echo_progress_start "Installing ACME script"
-    curl https://get.acme.sh | sh >> "$log" 2>&1
+    curl https://get.acme.sh | sh >> $log 2>&1
     echo_progress_done
 fi
 
-mkdir -p /etc/nginx/ssl/"${hostname}"
+mkdir -p /etc/nginx/ssl/${hostname}
 chmod 700 /etc/nginx/ssl
 
 /root/.acme.sh/acme.sh --set-default-ca --server zerossl >> $log 2>&1 || {
     echo_warn "Could not set default certificate authority to Zero SSL. Upgrading acme.sh to retry."
-    /root/.acme.sh/acme.sh --upgrade >> "$log" 2>&1 || {
+    /root/.acme.sh/acme.sh --upgrade >> $log 2>&1 || {
         echo_error "Could not upgrade acme.sh."
         exit 1
     }
-    /root/.acme.sh/acme.sh --set-default-ca --server zerossl >> "$log" 2>&1 || {
+    /root/.acme.sh/acme.sh --set-default-ca --server zerossl >> $log 2>&1 || {
         echo_error "Could not set default certificate authority to Zero SSL"
         exit 1
     }
