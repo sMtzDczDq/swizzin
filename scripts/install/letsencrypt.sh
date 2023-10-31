@@ -14,7 +14,8 @@ if [[ ! -f /install/.nginx.lock ]]; then
     echo_error "This script is meant to be used in conjunction with nginx and it has not been installed. Please install nginx first and restart this installer."
     exit 1
 fi
-
+env
+set -x
 . /etc/swizzin/sources/functions/letsencrypt
 ip=$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')
 
@@ -36,7 +37,7 @@ else
 fi
 
 if [[ -z $ZS_EAB ]]; then
-    echo_query "Enter EAB-KID from Zero SSL"
+    echo_query "Enter EAB-KID from Zero SSL. Go to https://app.zerossl.com/developer"
     read -e ZS_EAB
 fi
 if [[ -z $ZS_HMAC ]]; then
@@ -156,11 +157,11 @@ chmod 700 /etc/nginx/ssl
 }
 
 echo_progress_start "Registering account"
-    /root/.acme.sh/acme.sh --register-account --server zerossl --eab-kid ZS_EAB --eab-hmac-key ZS_HMAC >> $log 2>&1 || {
-        echo_error "Failed to register account"
-        exit 1
-    }
-    echo_info "Account registered"
+/root/.acme.sh/acme.sh --register-account --server zerossl --eab-kid ZS_EAB --eab-hmac-key ZS_HMAC >> $log 2>&1 || {
+    echo_error "Failed to register account"
+    exit 1
+}
+echo_info "Account registered"
 
 echo_progress_start "Registering certificates"
 if [[ ${cf} == yes ]]; then
