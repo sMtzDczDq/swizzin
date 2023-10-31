@@ -157,7 +157,7 @@ chmod 700 /etc/nginx/ssl
 }
 
 echo_progress_start "Registering account"
-/root/.acme.sh/acme.sh --register-account --server zerossl --eab-kid ZS_EAB --eab-hmac-key ZS_HMAC >> $log 2>&1 || {
+/root/.acme.sh/acme.sh --register-account --server zerossl --eab-kid $ZS_EAB --eab-hmac-key $ZS_HMAC >> $log 2>&1 || {
     echo_error "Failed to register account"
     exit 1
 }
