@@ -4,3 +4,5 @@ dev.env
 
 # Ignore JetBrains IDE's project settings folder
 .idea/**
+.vscode/settings.json
+.vscode/extensions.json
