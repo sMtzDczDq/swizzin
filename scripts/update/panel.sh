@@ -48,7 +48,7 @@ if [[ -f /install/.panel.lock ]]; then
 
     if ! grep -q SYSDCMNDS /etc/sudoers.d/panel; then
         echo_progress_start "Adding panel to sudoers"
-        cat > /etc/sudoers.d/panel << EOSUD
+        cat >/etc/sudoers.d/panel <<EOSUD
 #Defaults  env_keep -="HOME"
 Defaults:swizzin !logfile
 Defaults:swizzin !syslog

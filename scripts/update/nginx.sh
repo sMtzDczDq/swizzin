@@ -2,7 +2,7 @@
 
 function update_nginx() {
     # Deprecate nginx-extras in favour of installing fancyindex alone
-    if dpkg -s nginx-extras > /dev/null 2>&1; then
+    if dpkg -s nginx-extras >/dev/null 2>&1; then
         apt_remove nginx-extras
         apt_install nginx libnginx-mod-http-fancyindex
         apt_autoremove
@@ -79,7 +79,7 @@ function update_nginx() {
             :
         else
             echo_progress_start "Updating rutorrent nginx config"
-            cat > /etc/nginx/apps/rindex.conf << EOR
+            cat >/etc/nginx/apps/rindex.conf <<EOR
 location /rtorrent.downloads {
   alias /home/\$remote_user/torrents/rtorrent;
   include /etc/nginx/snippets/fancyindex.conf;
@@ -100,7 +100,7 @@ EOR
             :
         else
             echo_progress_start "Updating deluge nginx config"
-            cat > /etc/nginx/apps/dindex.conf << DIN
+            cat >/etc/nginx/apps/dindex.conf <<DIN
 location /deluge.downloads {
   alias /home/\$remote_user/torrents/deluge;
   include /etc/nginx/snippets/fancyindex.conf;
@@ -121,7 +121,7 @@ DIN
             :
         else
             echo_progress_start "Updating transmission nginx config"
-            cat > /etc/nginx/apps/tmsindex.conf << DIN
+            cat >/etc/nginx/apps/tmsindex.conf <<DIN
 location /transmission.downloads {
   alias /home/\$remote_user/torrents/transmission;
   include /etc/nginx/snippets/fancyindex.conf;
@@ -153,9 +153,9 @@ DIN
     fi
 
     # Create fancyindex conf if not exists
-    if [[ ! -f /etc/nginx/apps/fancyindex.conf ]] || grep -q posterity /etc/nginx/apps/fancyindex.conf > /dev/null 2>&1; then
+    if [[ ! -f /etc/nginx/apps/fancyindex.conf ]] || grep -q posterity /etc/nginx/apps/fancyindex.conf >/dev/null 2>&1; then
         echo_progress_start "Creating fancyindex app conf"
-        cat > /etc/nginx/apps/fancyindex.conf << FIAC
+        cat >/etc/nginx/apps/fancyindex.conf <<FIAC
 location /fancyindex {
     location ~ \.php($|/) {
         fastcgi_split_path_info ^(.+?\.php)(/.+)$;

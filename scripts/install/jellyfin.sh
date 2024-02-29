@@ -33,7 +33,7 @@ if [[ -n $active ]]; then
     fi
     if [[ $disable == "yes" ]]; then
         echo_progress_start "Disabling service"
-        systemctl disable -q --now ${active} >> ${log} 2>&1
+        systemctl disable -q --now ${active} >>${log} 2>&1
         echo_progress_done
     else
         exit 1
@@ -62,7 +62,7 @@ mkdir -p /etc/jellyfin
 chmod 755 /etc/jellyfin
 #
 # Create the dnla.xml so that we can Disable DNLA
-cat > /etc/jellyfin/dlna.xml <<- CONFIG
+cat >/etc/jellyfin/dlna.xml <<-CONFIG
 	<?xml version="1.0"?>
 	<DlnaOptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	  <EnablePlayTo>false</EnablePlayTo>
@@ -85,7 +85,7 @@ CONFIG
 #CONFIG
 
 # Create the network.xml. This is the applications network configuration file.
-cat > /etc/jellyfin/network.xml <<- CONFIG
+cat >/etc/jellyfin/network.xml <<-CONFIG
 <?xml version="1.0" encoding="utf-8"?>
 <NetworkConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <RequireHttps>true</RequireHttps>
@@ -115,8 +115,8 @@ CONFIG
 
 #
 # Add the jellyfin official repository and key to our installation so we can use apt-get to install it jellyfin and jellyfin-ffmepg.
-curl -s "https://repo.jellyfin.org/$DIST_ID/jellyfin_team.gpg.key" | gpg --dearmor > /usr/share/keyrings/jellyfin-archive-keyring.gpg 2>> "${log}"
-echo "deb [signed-by=/usr/share/keyrings/jellyfin-archive-keyring.gpg arch=$(dpkg --print-architecture)] https://repo.jellyfin.org/$DIST_ID $DIST_CODENAME main" > /etc/apt/sources.list.d/jellyfin.list
+curl -s "https://repo.jellyfin.org/$DIST_ID/jellyfin_team.gpg.key" | gpg --dearmor >/usr/share/keyrings/jellyfin-archive-keyring.gpg 2>>"${log}"
+echo "deb [signed-by=/usr/share/keyrings/jellyfin-archive-keyring.gpg arch=$(dpkg --print-architecture)] https://repo.jellyfin.org/$DIST_ID $DIST_CODENAME main" >/etc/apt/sources.list.d/jellyfin.list
 #
 # install jellyfin and jellyfin-ffmepg using apt functions.
 apt_update #forces apt refresh

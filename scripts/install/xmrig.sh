@@ -1,7 +1,7 @@
 #!/bin/bash
 # xmrig installer
 # Author: liara
-user=$(cut -d: -f1 < /root/.master.info)
+user=$(cut -d: -f1 </root/.master.info)
 noexec=$(grep "/tmp" /etc/fstab | grep noexec)
 latest=$(curl -s https://github.com/xmrig/xmrig/releases/latest | grep -oP 'v\K\d+.\d+.\d+')
 
@@ -43,7 +43,7 @@ apt_install screen git build-essential cmake libuv1-dev libmicrohttpd-dev libssl
 
 cd /tmp
 echo_progress_start "Cloning xmrig"
-git clone --depth 1 --single-branch --branch v${latest} https://github.com/xmrig/xmrig.git >> $log 2>&1
+git clone --depth 1 --single-branch --branch v${latest} https://github.com/xmrig/xmrig.git >>$log 2>&1
 echo_progress_done
 
 cd xmrig
@@ -58,8 +58,8 @@ fi
 echo_progress_start "Building xmrig"
 mkdir build
 cd build
-cmake .. >> $log 2>&1
-make -j$(nproc) >> $log 2>&1
+cmake .. >>$log 2>&1
+make -j$(nproc) >>$log 2>&1
 mv xmrig /usr/local/bin/
 echo_progress_done
 
@@ -81,11 +81,11 @@ if [[ -n $noexec ]]; then
 fi
 
 if [[ -z $(grep vm.nr_hugepages=128 /etc/sysctl.conf) ]]; then
-    echo "vm.nr_hugepages=128" >> /etc/sysctl.conf
+    echo "vm.nr_hugepages=128" >>/etc/sysctl.conf
     sysctl -p
 fi
 
-cat > /etc/systemd/system/xmrig.service << XMR
+cat >/etc/systemd/system/xmrig.service <<XMR
 [Unit]
 Description=xmrig miner
 After=network.target

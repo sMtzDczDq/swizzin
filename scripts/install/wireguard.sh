@@ -13,14 +13,14 @@ function _defiface_confirm() {
     echo_query "Setup has detected that $defiface is your main interface, is this correct?" ""
     select yn in "yes" "no"; do
         case $yn in
-            yes)
-                wgiface=$defiface
-                break
-                ;;
-            no)
-                _selectiface
-                break
-                ;;
+        yes)
+            wgiface=$defiface
+            break
+            ;;
+        no)
+            _selectiface
+            break
+            ;;
         esac
     done
 }
@@ -29,10 +29,10 @@ function _selectiface() {
     echo_query "Please choose the correct interface from the following list:" ""
     select seliface in "${IFACES[@]}"; do
         case $seliface in
-            *)
-                wgiface=$seliface
-                break
-                ;;
+        *)
+            wgiface=$seliface
+            break
+            ;;
         esac
     done
     # echo "Your interface has been set as $wgiface"
@@ -42,13 +42,13 @@ function _selectiface() {
 function _install_wg() {
 
     case ${codename} in
-        buster)
-            check_debian_backports
-            PKGS+=(wireguard-dkms qrencode iptables)
-            ;;
-        *)
-            PKGS=(wireguard qrencode iptables)
-            ;;
+    buster)
+        check_debian_backports
+        PKGS+=(wireguard-dkms qrencode iptables)
+        ;;
+    *)
+        PKGS=(wireguard qrencode iptables)
+        ;;
     esac
 
     apt_update
@@ -61,7 +61,7 @@ function _install_wg() {
     chown -R root:root /etc/wireguard/
     chmod -R 700 /etc/wireguard
 
-    if ! modprobe wireguard >> $log 2>&1; then
+    if ! modprobe wireguard >>$log 2>&1; then
         echo_error "Could not modprobe Wireguard, script will now terminate."
         echo_info "Please ensure a kernel headers package is installed that matches the currently running kernel.
 Currently running kernel:
@@ -76,9 +76,9 @@ Please consult the swizzin log for further info if required."
     systemctl daemon-reload -q
     echo_progress_done
 
-    echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
-    sysctl -p > /dev/null 2>&1
-    echo "$wgiface" > /install/.wireguard.lock
+    echo "net.ipv4.ip_forward = 1" >>/etc/sysctl.conf
+    sysctl -p >/dev/null 2>&1
+    echo "$wgiface" >/install/.wireguard.lock
     touch /install/.wireguard.lock
 }
 
@@ -88,10 +88,10 @@ function _mkconf_wg() {
     mkdir -p /home/$u/.wireguard/{server,client}
 
     cd /home/$u/.wireguard/server
-    wg genkey | tee wg$(id -u $u).key | wg pubkey > wg$(id -u $u).pub
+    wg genkey | tee wg$(id -u $u).key | wg pubkey >wg$(id -u $u).pub
 
     cd /home/$u/.wireguard/client
-    wg genkey | tee $u.key | wg pubkey > $u.pub
+    wg genkey | tee $u.key | wg pubkey >$u.pub
 
     chown $u: /home/$u/.wireguard
     chmod -R 700 /home/$u/.wireguard
@@ -104,7 +104,7 @@ function _mkconf_wg() {
     net=$(id -u $u | cut -c 1-3)
     sub=$(id -u $u | rev | cut -c 1 | rev)
     subnet=10.$net.$sub.
-    cat > /etc/wireguard/wg$(id -u $u).conf << EOWGS
+    cat >/etc/wireguard/wg$(id -u $u).conf <<EOWGS
 [Interface]
 Address = ${subnet}1
 SaveConfig = true
@@ -127,7 +127,7 @@ EOWGS
     #PublicKey = $peerpub
     #AllowedIPs = ${subnet}2/32
 
-    cat > /home/$u/.wireguard/$u.conf << EOWGC
+    cat >/home/$u/.wireguard/$u.conf <<EOWGC
 [Interface]
 Address = ${subnet}2/24
 PrivateKey = $peerpriv
@@ -173,7 +173,7 @@ if [[ -z $wgiface ]]; then
     IFACES=($(ip link show | grep -i broadcast | grep UP | grep qlen | cut -d: -f 2 | cut -d@ -f 1 | sed -e 's/ //g'))
     #MASTER=$(ip link show | grep -i broadcast | grep -e MASTER | cut -d: -f 2| cut -d@ -f 1 | sed -e 's/ //g')
     _defiface_confirm
-    if [[ -f /install/.wireguard.lock ]]; then echo $wgiface > /install/.wireguard.lock; fi
+    if [[ -f /install/.wireguard.lock ]]; then echo $wgiface >/install/.wireguard.lock; fi
 fi
 
 #When a new user is being installed

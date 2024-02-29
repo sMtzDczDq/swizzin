@@ -27,7 +27,7 @@ function _installautodl() {
 
 function _autoconf() {
     echo_progress_start "Downloading autodl source code"
-    wget -q "$(curl -sL http://git.io/vlcND | jq .assets[0].browser_download_url -r)" -O /tmp/autodl-irssi.zip >> $log 2>&1 || {
+    wget -q "$(curl -sL http://git.io/vlcND | jq .assets[0].browser_download_url -r)" -O /tmp/autodl-irssi.zip >>$log 2>&1 || {
         echo_error "Autodl download failed, please check the log"
         exit 1
     }
@@ -37,12 +37,12 @@ function _autoconf() {
         IRSSI_PASS=$(_string)
         IRSSI_PORT=$(shuf -i 20000-61000 -n 1)
         newdir="/home/${u}/.irssi/scripts/autorun/"
-        mkdir -p "$newdir" >> "${log}" 2>&1
-        unzip -o /tmp/autodl-irssi.zip -d /home/"${u}"/.irssi/scripts/ >> "${log}" 2>&1
+        mkdir -p "$newdir" >>"${log}" 2>&1
+        unzip -o /tmp/autodl-irssi.zip -d /home/"${u}"/.irssi/scripts/ >>"${log}" 2>&1
         cp /home/"${u}"/.irssi/scripts/autodl-irssi.pl "$newdir"
-        mkdir -p "/home/${u}/.autodl" >> "${log}" 2>&1
+        mkdir -p "/home/${u}/.autodl" >>"${log}" 2>&1
         touch "/home/${u}/.autodl/autodl.cfg"
-        cat > "/home/${u}/.autodl/autodl.cfg" << ADC
+        cat >"/home/${u}/.autodl/autodl.cfg" <<ADC
 [options]
 gui-server-port = ${IRSSI_PORT}
 gui-server-password = ${IRSSI_PASS}
@@ -59,7 +59,7 @@ ADC
 
 function _autoservice() {
     echo_progress_start "Creating systemd service"
-    cat > "/etc/systemd/system/irssi@.service" << ADC
+    cat >"/etc/systemd/system/irssi@.service" <<ADC
 [Unit]
 Description=AutoDL IRSSI
 After=network.target
@@ -82,7 +82,7 @@ ADC
     echo_progress_done
 }
 
-users=($(cut -d: -f1 < /etc/htpasswd))
+users=($(cut -d: -f1 </etc/htpasswd))
 
 if [[ -n $1 ]]; then
     users=($1)

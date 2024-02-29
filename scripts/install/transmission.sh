@@ -8,7 +8,7 @@
 
 _mkservice_transmission() {
     echo_progress_start "Creating systemd services"
-    cat > /etc/systemd/system/transmission@.service << EOF
+    cat >/etc/systemd/system/transmission@.service <<EOF
 [Unit]
 Description=Transmission BitTorrent Daemon for %i
 After=network.target
@@ -30,7 +30,7 @@ EOF
 _start_transmission() {
     #This always needs to be done only after the configs have been made, otherwise transmission will overwrite them.
     echo_progress_start "Starting transmission instance for ${bold}$user"
-    systemctl enable -q transmission@${user} 2>> $log
+    systemctl enable -q transmission@${user} 2>>$log
     service transmission@${user} start
     echo_progress_done "Instance started"
 }
@@ -104,7 +104,7 @@ _mkdir_transmission() {
 
 _mkconf_transmission() {
     echo_progress_start "Creating config for ${bold}$user"
-    cat > /home/${user}/.config/transmission-daemon/settings.json << EOF
+    cat >/home/${user}/.config/transmission-daemon/settings.json <<EOF
 {
     "alt-speed-down": 50,
     "alt-speed-enabled": false,
@@ -202,8 +202,8 @@ _nginx_transmission() {
 export DEBIAN_FRONTEND=noninteractive
 
 noexec=$(grep "/tmp" /etc/fstab | grep noexec)
-user=$(cut -d: -f1 < /root/.master.info)
-users=($(cut -d: -f1 < /etc/htpasswd))
+user=$(cut -d: -f1 </root/.master.info)
+users=($(cut -d: -f1 </etc/htpasswd))
 
 # Extra-user-only functions
 if [[ -n $1 ]]; then

@@ -17,7 +17,7 @@
 #   including (via compiler) GPL-licensed code must also be made available
 #   under the GPL along with build & install instructions.
 #
-username=$(cut -d: -f1 < /root/.master.info)
+username=$(cut -d: -f1 </root/.master.info)
 
 function _removeSonarrv2() {
     systemctl stop -q sonarr@"${username}"
@@ -28,7 +28,7 @@ function _removeSonarrv2() {
     rm -f /etc/apt/sources.list.d/sonarr.list
 
     if [[ -f /etc/init.d/sonarr ]]; then
-        sudo update-rc.d -f sonarr remove > /dev/null 2>&1
+        sudo update-rc.d -f sonarr remove >/dev/null 2>&1
         sudo rm /etc/default/sonarr
         sudo rm /etc/init.d/sonarr
     fi

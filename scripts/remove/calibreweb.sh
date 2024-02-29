@@ -12,7 +12,7 @@ if [[ -f /install/.nginx.lock ]]; then
     systemctl reload nginx
 fi
 
-userdel calibreweb -f -r >> "$log" 2>&1
+userdel calibreweb -f -r >>"$log" 2>&1
 
 if [ ! -f /install/.calibrecs.lock ] && [ ! -f /install/.calibre.lock ]; then
     echo_log_only "Clearing calibre swizdb"

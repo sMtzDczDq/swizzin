@@ -28,6 +28,6 @@ if [[ $distribution == "Ubuntu" ]]; then
     apt_update
     rm /install/.quassel.lock
 else
-    dpkg -r quassel-core* > /dev/null 2>&1
+    dpkg -r quassel-core* >/dev/null 2>&1
     rm /install/.quassel.lock
 fi

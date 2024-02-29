@@ -19,7 +19,7 @@ CODENAME=$(lsb_release -cs)
 
 echo_progress_start "Creating system user for znc"
 useradd znc -m -s /bin/bash
-passwd znc -l >> ${log} 2>&1
+passwd znc -l >>${log} 2>&1
 echo_progress_done
 
 if [[ $DISTRO == Debian ]]; then
@@ -32,7 +32,7 @@ fi
 apt_install znc
 #sudo -u znc crontab -l | echo -e "*/10 * * * * /usr/bin/znc >/dev/null 2>&1\n@reboot /usr/bin/znc >/dev/null 2>&1" | crontab -u znc - > /dev/null 2>&1
 echo_progress_start "Installing systemd service"
-cat > /etc/systemd/system/znc.service << ZNC
+cat >/etc/systemd/system/znc.service <<ZNC
 [Unit]
 Description=ZNC, an advanced IRC bouncer
 After=network-online.target
@@ -51,7 +51,7 @@ echo_progress_done
 echo_warn "ZNC configuration will now run. Please answer the following prompts"
 sleep 5
 sudo -H -u znc znc --makeconf
-killall -u znc znc > /dev/null 2>&1
+killall -u znc znc >/dev/null 2>&1
 sleep 1
 
 # Check for LE cert, and copy it if available.
@@ -60,6 +60,6 @@ if [[ -f /install/nginx.lock ]]; then
 fi
 
 systemctl start znc
-echo "$(grep Port /home/znc/.znc/configs/znc.conf | sed -e 's/^[ \t]*//')" > /install/.znc.lock
-echo "$(grep SSL /home/znc/.znc/configs/znc.conf | sed -e 's/^[ \t]*//')" >> /install/.znc.lock
+echo "$(grep Port /home/znc/.znc/configs/znc.conf | sed -e 's/^[ \t]*//')" >/install/.znc.lock
+echo "$(grep SSL /home/znc/.znc/configs/znc.conf | sed -e 's/^[ \t]*//')" >>/install/.znc.lock
 echo_success "ZNC installed"

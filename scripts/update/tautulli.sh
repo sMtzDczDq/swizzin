@@ -27,19 +27,19 @@ if [[ -f /install/.tautulli.lock ]]; then
         fi
 
         case ${PYENV} in
-            True)
-                pyenv_install
-                pyenv_install_version 3.11.3
-                pyenv_create_venv 3.11.3 /opt/.venv/tautulli
-                chown -R tautulli: /opt/.venv/tautulli
-                ;;
-            *)
-                python3_venv tautulli tautulli
-                ;;
+        True)
+            pyenv_install
+            pyenv_install_version 3.11.3
+            pyenv_create_venv 3.11.3 /opt/.venv/tautulli
+            chown -R tautulli: /opt/.venv/tautulli
+            ;;
+        *)
+            python3_venv tautulli tautulli
+            ;;
         esac
         sed -i 's|ExecStart=/usr|ExecStart=/opt/.venv/tautulli|g' /etc/systemd/system/tautulli.service
         systemctl daemon-reload
-        if systemctl is-active tautulli > /dev/null 2>&1; then
+        if systemctl is-active tautulli >/dev/null 2>&1; then
             systemctl restart tautulli
         fi
         echo_progress_done
@@ -56,9 +56,9 @@ if [[ -f /install/.plexpy.lock ]]; then
     if [[ $active == "active" ]]; then
         systemctl stop plexpy
     fi
-    cp -a /opt/plexpy/config.ini /tmp/config.ini.tautulli_bak &> /dev/null
-    cp -a /opt/plexpy/plexpy.db /tmp/tautulli.db.tautulli_bak &> /dev/null
-    cp -a /opt/plexpy/tautulli.db /tmp/tautulli.db.tautulli_bak &> /dev/null
+    cp -a /opt/plexpy/config.ini /tmp/config.ini.tautulli_bak &>/dev/null
+    cp -a /opt/plexpy/plexpy.db /tmp/tautulli.db.tautulli_bak &>/dev/null
+    cp -a /opt/plexpy/tautulli.db /tmp/tautulli.db.tautulli_bak &>/dev/null
 
     systemctl stop plexpy
     systemctl disable -q plexpy
@@ -69,12 +69,12 @@ if [[ -f /install/.plexpy.lock ]]; then
     rm /etc/systemd/system/plexpy.service
 
     # install tautulli instead
-    source /usr/local/bin/swizzin/install/tautulli.sh &> /dev/null
+    source /usr/local/bin/swizzin/install/tautulli.sh &>/dev/null
     systemctl stop tautulli
 
     # restore backups
-    mv /tmp/config.ini.tautulli_bak /opt/tautulli/config.ini &> /dev/null
-    mv /tmp/tautulli.db.tautulli_bak /opt/tautulli/tautulli.db &> /dev/null
+    mv /tmp/config.ini.tautulli_bak /opt/tautulli/config.ini &>/dev/null
+    mv /tmp/tautulli.db.tautulli_bak /opt/tautulli/tautulli.db &>/dev/null
 
     sed -i 's#/opt/plexpy#/opt/tautulli#g' /opt/tautulli/config.ini
     sed -i "s/http_root.*/http_root = \"tautulli\"/g" /opt/tautulli/config.ini

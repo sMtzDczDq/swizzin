@@ -5,10 +5,10 @@ if [[ -f /install/.couchpotato.lock ]]; then
         echo_progress_start "Updating CouchPotato"
 
         codename=$(lsb_release -cs)
-        user=$(cut -d: -f1 < /root/.master.info)
+        user=$(cut -d: -f1 </root/.master.info)
         isactive=$(systemctl is-active couchpotato@${user})
         . /etc/swizzin/sources/functions/pyenv
-        systemctl disable -q --now couchpotato@${user} >> ${log} 2>&1
+        systemctl disable -q --now couchpotato@${user} >>${log} 2>&1
         if [[ $codename = "buster" ]]; then
             LIST='git python2.7-dev python-virtualenv virtualenv'
         else
@@ -20,11 +20,11 @@ if [[ -f /install/.couchpotato.lock ]]; then
             python_getpip
         fi
         python2_venv ${user} couchpotato
-        /opt/.venv/couchpotato/bin/pip install pyOpenSSL lxml >> "${log}" 2>&1
+        /opt/.venv/couchpotato/bin/pip install pyOpenSSL lxml >>"${log}" 2>&1
         chown -R ${user}: /opt/.venv/couchpotato
 
         mv /home/${user}/.couchpotato /opt/couchpotato
-        cat > /etc/systemd/system/couchpotato.service << CPSD
+        cat >/etc/systemd/system/couchpotato.service <<CPSD
 [Unit]
 Description=CouchPotato
 After=syslog.target network.target

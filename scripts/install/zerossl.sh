@@ -136,20 +136,20 @@ apt_install socat
 
 if [[ ! -f /root/.acme.sh/acme.sh ]]; then
     echo_progress_start "Installing ACME script"
-    curl https://get.acme.sh | sh >> $log 2>&1
+    curl https://get.acme.sh | sh >>$log 2>&1
     echo_progress_done
 fi
 
 mkdir -p /etc/nginx/ssl/${hostname}
 chmod 700 /etc/nginx/ssl
 
-/root/.acme.sh/acme.sh --set-default-ca --server zerossl >> $log 2>&1 || {
+/root/.acme.sh/acme.sh --set-default-ca --server zerossl >>$log 2>&1 || {
     echo_warn "Could not set default certificate authority to Zero SSL. Upgrading acme.sh to retry."
-    /root/.acme.sh/acme.sh --upgrade >> "$log" 2>&1 || {
+    /root/.acme.sh/acme.sh --upgrade >>"$log" 2>&1 || {
         echo_error "Could not upgrade acme.sh."
         exit 1
     }
-    /root/.acme.sh/acme.sh --set-default-ca --server zerossl >> $log 2>&1 || {
+    /root/.acme.sh/acme.sh --set-default-ca --server zerossl >>$log 2>&1 || {
         echo_error "Could not set default certificate authority to Zero SSL"
         exit 1
     }
@@ -157,7 +157,7 @@ chmod 700 /etc/nginx/ssl
 }
 
 echo_progress_start "Registering account"
-/root/.acme.sh/acme.sh --register-account --server zerossl --eab-kid $ZS_EAB --eab-hmac-key $ZS_HMAC >> $log 2>&1 || {
+/root/.acme.sh/acme.sh --register-account --server zerossl --eab-kid $ZS_EAB --eab-hmac-key $ZS_HMAC >>$log 2>&1 || {
     echo_error "Failed to register account"
     exit 1
 }
@@ -165,19 +165,19 @@ echo_info "Account registered"
 
 echo_progress_start "Registering certificates"
 if [[ ${cf} == yes ]]; then
-    /root/.acme.sh/acme.sh --force --issue --dns dns_cf -d ${hostname} >> $log 2>&1 || {
+    /root/.acme.sh/acme.sh --force --issue --dns dns_cf -d ${hostname} >>$log 2>&1 || {
         echo_error "Certificate could not be issued."
         exit 1
     }
 else
     if [[ $main = yes ]]; then
-        /root/.acme.sh/acme.sh --force --issue --nginx -d ${hostname} >> $log 2>&1 || {
+        /root/.acme.sh/acme.sh --force --issue --nginx -d ${hostname} >>$log 2>&1 || {
             echo_error "Certificate could not be issued."
             exit 1
         }
     else
         systemctl stop nginx
-        /root/.acme.sh/acme.sh --force --issue --standalone -d ${hostname} --pre-hook "systemctl stop nginx" --post-hook "systemctl start nginx" >> $log 2>&1 || {
+        /root/.acme.sh/acme.sh --force --issue --standalone -d ${hostname} --pre-hook "systemctl stop nginx" --post-hook "systemctl start nginx" >>$log 2>&1 || {
             echo_error "Certificate could not be issued. Please check your info and try again"
             exit 1
         }

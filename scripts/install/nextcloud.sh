@@ -56,21 +56,21 @@ else
     echo_progress_start "Downloading and extracting Nextcloud"
     codename=$(lsb_release -cs)
     case $codename in
-        buster)
-            version=latest-23
-            ;;
-        focal | bullseye)
-            version=latest-25
-            ;;
-        *)
-            version=latest
-            ;;
+    buster)
+        version=latest-23
+        ;;
+    focal | bullseye)
+        version=latest-25
+        ;;
+    *)
+        version=latest
+        ;;
     esac
-    wget https://download.nextcloud.com/server/releases/${version}.zip >> ${log} 2>&1 || {
+    wget https://download.nextcloud.com/server/releases/${version}.zip >>${log} 2>&1 || {
         echo_error "Could not download nextcloud"
         exit 1
     }
-    unzip ${version}.zip >> ${log} 2>&1
+    unzip ${version}.zip >>${log} 2>&1
     mv nextcloud /srv
     rm -rf /tmp/${version}.zip
     echo_progress_done "Nextcloud extracted"
@@ -110,7 +110,7 @@ else
     phpversion=$(php_service_version)
     sock="php${phpversion}-fpm"
 
-    cat > /etc/nginx/apps/nextcloud.conf << EOF
+    cat >/etc/nginx/apps/nextcloud.conf <<EOF
 # The following 2 rules are only needed for the user_webfinger app.
 # Uncomment it if you're planning to use this app.
 #rewrite ^/.well-known/host-meta /nextcloud/public.php?service=host-meta last;

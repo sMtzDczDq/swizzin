@@ -6,11 +6,11 @@ function _uplounge() {
     if [[ $active == "active" ]]; then
         systemctl stop lounge
     fi
-    npm uninstall -g thelounge --save >> /dev/null 2>&1
+    npm uninstall -g thelounge --save >>/dev/null 2>&1
     yarn_install
-    yarn --non-interactive global add thelounge >> $log 2>&1
-    yarn --non-interactive cache clean >> $log 2>&1
-    sudo -u lounge bash -c "thelounge install thelounge-theme-zenburn" >> /dev/null 2>&1
+    yarn --non-interactive global add thelounge >>$log 2>&1
+    yarn --non-interactive cache clean >>$log 2>&1
+    sudo -u lounge bash -c "thelounge install thelounge-theme-zenburn" >>/dev/null 2>&1
     if [[ ! -d /home/lounge/.thelounge ]]; then
         mv /home/lounge/.lounge /home/lounge/.thelounge
         sed -i 's|theme: "zenburn"|theme: "thelounge-theme-zenburn"|g' /home/lounge/.thelounge/config.js

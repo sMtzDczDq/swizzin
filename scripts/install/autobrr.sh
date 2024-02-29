@@ -14,7 +14,7 @@ _systemd() {
     fi
 
     echo_progress_start "Installing Systemd service"
-    cat > /etc/systemd/system/autobrr@.service << EOF
+    cat >/etc/systemd/system/autobrr@.service <<EOF
 [Unit]
 Description=autobrr service for %i
 After=syslog.target network.target
@@ -35,7 +35,7 @@ _nginx() {
     if [[ -f /install/.nginx.lock ]]; then
         echo_progress_start "Configuring nginx for autobrr"
         bash /etc/swizzin/scripts/nginx/autobrr.sh
-        systemctl reload nginx >> $log 2>&1
+        systemctl reload nginx >>$log 2>&1
         echo_progress_done "Nginx configured for autobrr"
     fi
 }
@@ -55,7 +55,7 @@ _add_users() {
         chown "$user": "/home/$user/.config"
         chown -R "$user": "/home/$user/.config/autobrr"
 
-        cat > "/home/$user/.config/autobrr/config.toml" << CFG
+        cat >"/home/$user/.config/autobrr/config.toml" <<CFG
 # config.toml
 # Hostname / IP
 #

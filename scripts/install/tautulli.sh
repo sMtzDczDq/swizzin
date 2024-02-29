@@ -16,7 +16,7 @@
 
 . /etc/swizzin/sources/functions/pyenv
 
-user=$(cut -d: -f1 < /root/.master.info)
+user=$(cut -d: -f1 </root/.master.info)
 
 systempy3_ver=$(get_candidate_version python3)
 
@@ -28,29 +28,29 @@ else
 fi
 
 case ${PYENV} in
-    True)
-        pyenv_install
-        pyenv_install_version 3.11.3
-        pyenv_create_venv 3.11.3 /opt/.venv/tautulli
-        chown -R tautulli: /opt/.venv/tautulli
-        ;;
-    *)
-        python3_venv tautulli tautulli
-        ;;
+True)
+    pyenv_install
+    pyenv_install_version 3.11.3
+    pyenv_create_venv 3.11.3 /opt/.venv/tautulli
+    chown -R tautulli: /opt/.venv/tautulli
+    ;;
+*)
+    python3_venv tautulli tautulli
+    ;;
 esac
 
 cd /opt
 echo_progress_start "Cloning latest Tautulli repo"
-git clone https://github.com/Tautulli/Tautulli.git tautulli >> "${log}" 2>&1
+git clone https://github.com/Tautulli/Tautulli.git tautulli >>"${log}" 2>&1
 echo_progress_done
 
 echo_progress_start "Adding user and setting up Tautulli"
-adduser --system --no-create-home tautulli >> "${log}" 2>&1
+adduser --system --no-create-home tautulli >>"${log}" 2>&1
 chown tautulli:nogroup -R /opt/tautulli
 echo_progress_done
 
 echo_progress_start "Enabling Tautulli Systemd configuration"
-cat > /etc/systemd/system/tautulli.service << PPY
+cat >/etc/systemd/system/tautulli.service <<PPY
 [Unit]
 Description=Tautulli - Stats for Plex Media Server usage
 Wants=network-online.target

@@ -8,11 +8,11 @@
 #   changes/dates in source files. Any modifications to our software
 #   including (via compiler) GPL-licensed code must also be made available
 #   under the GPL along with build & install instructions.
-users=($(cut -d: -f1 < /etc/htpasswd))
+users=($(cut -d: -f1 </etc/htpasswd))
 if [[ -f /install/.rutorrent.lock ]]; then
     cd /srv/rutorrent/plugins/
     if [[ ! -d /srv/rutorrent/plugins/autodl-irssi ]]; then
-        git clone https://github.com/swizzin/autodl-rutorrent.git autodl-irssi >> ${log} 2>&1 || { echo_error "git of autodl plugin to main plugins seems to have failed"; }
+        git clone https://github.com/swizzin/autodl-rutorrent.git autodl-irssi >>${log} 2>&1 || { echo_error "git of autodl plugin to main plugins seems to have failed"; }
         chown -R www-data:www-data autodl-irssi/
     fi
     for u in "${users[@]}"; do
@@ -21,9 +21,9 @@ if [[ -f /install/.rutorrent.lock ]]; then
         if [[ -z $(grep autodl /srv/rutorrent/conf/users/${u}/config.php) ]]; then
             sed -i '/?>/d' /srv/rutorrent/conf/users/${u}/config.php
             sed -i '/autodl/d' /srv/rutorrent/conf/users/${u}/config.php
-            echo "\$autodlPort = \"$IRSSI_PORT\";" >> /srv/rutorrent/conf/users/${u}/config.php
-            echo "\$autodlPassword = \"$IRSSI_PASS\";" >> /srv/rutorrent/conf/users/${u}/config.php
-            echo "?>" >> /srv/rutorrent/conf/users/${u}/config.php
+            echo "\$autodlPort = \"$IRSSI_PORT\";" >>/srv/rutorrent/conf/users/${u}/config.php
+            echo "\$autodlPassword = \"$IRSSI_PASS\";" >>/srv/rutorrent/conf/users/${u}/config.php
+            echo "?>" >>/srv/rutorrent/conf/users/${u}/config.php
         fi
     done
 fi

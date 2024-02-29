@@ -1,5 +1,5 @@
 #!/bin/bash
-user=$(cut -d: -f1 < /root/.master.info)
+user=$(cut -d: -f1 </root/.master.info)
 if [[ -d /home/${user}/.venv ]]; then
     mv /home/${user}/.venv /opt
     envs=($(ls /opt/.venv))
@@ -8,7 +8,7 @@ if [[ -d /home/${user}/.venv ]]; then
         sed -i "s|/home/${user}|/opt|g" /etc/systemd/system/${app}.service
         sed -i "s|/opt/.config|/home/${user}/.config|g" /etc/systemd/system/${app}.service
         if [[ $app == "pyload" ]]; then
-            echo "/opt/pyload" > /opt/pyload/module/config/configdir
+            echo "/opt/pyload" >/opt/pyload/module/config/configdir
         fi
         systemctl daemon-reload
         systemctl try-restart $app

@@ -2,7 +2,7 @@
 # nginx configuration for flood
 # Author: flying_sausages
 
-cat > /etc/nginx/apps/flood.conf << EOF
+cat >/etc/nginx/apps/flood.conf <<EOF
 location /flood/api {
   proxy_pass http://\$remote_user.flood;
   proxy_buffering off;
@@ -31,7 +31,7 @@ for user in "${users[@]}"; do
     if [[ ! -f /etc/nginx/conf.d/${user}.flood.conf ]]; then
         . /home/${user}/.config/flood/env || { echo_warn "Could not determine flood port for ${user}"; }
         echo_progress_start "Creating flood nginx upstream for $user"
-        cat > /etc/nginx/conf.d/${user}.flood.conf << FLUPS
+        cat >/etc/nginx/conf.d/${user}.flood.conf <<FLUPS
 upstream $user.flood {
   server 127.0.0.1:${FLOOD_PORT};
 }

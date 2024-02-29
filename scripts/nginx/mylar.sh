@@ -11,7 +11,7 @@ sed -r 's|http_host = (.*)|http_host = 127.0.0.1|g' -i "/home/${mylar_owner}/.co
 sed -r 's|http_root = (.*)|http_root = /mylar|g' -i "/home/${mylar_owner}/.config/mylar/config.ini"
 [[ -f /install/.mylar.lock ]] && systemctl -q start mylar
 
-cat > /etc/nginx/apps/mylar.conf << EON
+cat >/etc/nginx/apps/mylar.conf <<EON
 location ^~ /mylar {
     include snippets/proxy.conf;
     proxy_pass http://127.0.0.1:${port};

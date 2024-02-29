@@ -16,7 +16,7 @@ if [[ $active == "active" ]]; then
 fi
 
 if [[ ! -f /etc/nginx/apps/nzbhydra.conf ]]; then
-    cat > /etc/nginx/apps/nzbhydra.conf << RAD
+    cat >/etc/nginx/apps/nzbhydra.conf <<RAD
 location /nzbhydra {
   include /etc/nginx/snippets/proxy.conf;
   proxy_pass        http://127.0.0.1:5076/nzbhydra;

@@ -17,10 +17,10 @@ if [[ -f /install/.pyload.lock ]]; then
     if [[ -f /etc/systemd/system/pyload@.service ]]; then
         echo_progress_start "Updating pyLoad to use pyenv"
         codename=$(lsb_release -cs)
-        user=$(cut -d: -f1 < /root/.master.info)
+        user=$(cut -d: -f1 </root/.master.info)
         isactive=$(systemctl is-active pyload@${user})
         . /etc/swizzin/sources/functions/pyenv
-        systemctl disable -q --now pyload@${user} >> ${log} 2>&1
+        systemctl disable -q --now pyload@${user} >>${log} 2>&1
         if [[ $codename = "buster" ]]; then
             LIST='tesseract-ocr gocr rhino python2.7-dev python-pip virtualenv python-virtualenv libcurl4-openssl-dev sqlite3'
         else
@@ -35,13 +35,13 @@ if [[ -f /install/.pyload.lock ]]; then
         python2_venv ${user} pyload
 
         PIP='wheel setuptools pycurl pycrypto tesseract pillow pyOpenSSL js2py feedparser beautifulsoup'
-        /opt/.venv/pyload/bin/pip install $PIP >> "${log}" 2>&1
+        /opt/.venv/pyload/bin/pip install $PIP >>"${log}" 2>&1
         chown -R ${user}: /opt/.venv/pyload
 
         mv /home/${user}/.pyload /opt/pyload
-        echo "/opt/pyload" > /opt/pyload/module/config/configdir
+        echo "/opt/pyload" >/opt/pyload/module/config/configdir
 
-        cat > /etc/systemd/system/pyload.service << PYSD
+        cat >/etc/systemd/system/pyload.service <<PYSD
 [Unit]
 Description=pyLoad
 After=network.target

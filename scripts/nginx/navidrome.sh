@@ -13,7 +13,7 @@ sed -r 's|Address = (.*)|Address = "127.0.0.1"|g' -i "/home/${user}/.config/navi
 sed -r 's|BaseUrl = (.*)|BaseUrl = "/navidrome"|g' -i "/home/${user}/.config/navidrome/navidrome.toml"
 [[ -f /install/.navidrome.lock ]] && systemctl -q start navidrome
 
-cat > /etc/nginx/apps/navidrome.conf <<- NGX
+cat >/etc/nginx/apps/navidrome.conf <<-NGX
 	location /navidrome {
 	    proxy_pass        http://127.0.0.1:${http_port}/navidrome;
 	    proxy_set_header Host \$proxy_host;

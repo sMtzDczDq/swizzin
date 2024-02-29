@@ -2,9 +2,9 @@
 # Webmin nginx installer
 # flying_sausages for swizzin 2020
 
-MASTER=$(cut -d: -f1 < /root/.master.info)
+MASTER=$(cut -d: -f1 </root/.master.info)
 if [[ ! -f /etc/nginx/apps/webmin.conf ]]; then
-    cat > /etc/nginx/apps/webmin.conf << WEBC
+    cat >/etc/nginx/apps/webmin.conf <<WEBC
 location /webmin/ {
     include /etc/nginx/snippets/proxy.conf;
 
@@ -20,13 +20,13 @@ location /webmin/ {
 WEBC
 fi
 
-cat >> /etc/webmin/config << EOF
+cat >>/etc/webmin/config <<EOF
 webprefix=/webmin
 webprefixnoredir=1
 referers=${referers}
 EOF
 
-cat >> /etc/webmin/miniserv.conf << EOF
+cat >>/etc/webmin/miniserv.conf <<EOF
 bind=127.0.0.1
 sockets=
 EOF

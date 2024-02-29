@@ -6,8 +6,8 @@ function check_debian_backports() {
         echo_log_only "Debian ${codename} backports already enabled."
     else
         echo_info "Enabling Debian ${codename} backports repository"
-        echo "deb http://ftp.debian.org/debian ${codename}-backports main" >> /etc/apt/sources.list
-        echo "deb-src http://ftp.debian.org/debian ${codename}-backports main" >> /etc/apt/sources.list
+        echo "deb http://ftp.debian.org/debian ${codename}-backports main" >>/etc/apt/sources.list
+        echo "deb-src http://ftp.debian.org/debian ${codename}-backports main" >>/etc/apt/sources.list
         apt_update
     fi
 }
@@ -16,7 +16,7 @@ function check_debian_backports() {
 set_packages_to_backports() {
     codename=$(lsb_release -cs)
     for package in "$@"; do
-        cat > /etc/apt/preferences.d/"$package" << BPO
+        cat >/etc/apt/preferences.d/"$package" <<BPO
 Package: *$package*
 Pin: release a=${codename}-backports
 Pin-Priority: 500
@@ -31,8 +31,8 @@ function check_ubuntu_updates() {
         :
     else
         echo_progress_start "Enabling Ubuntu ${codename} recommended updates repository"
-        echo "deb http://archive.ubuntu.com/ubuntu ${codename}-updates main restricted universe multiverse" >> /etc/apt/sources.list
-        echo "#deb-src http://archive.ubuntu.com/ubuntu ${codename}-updates main restricted universe multiverse" >> /etc/apt/sources.list
+        echo "deb http://archive.ubuntu.com/ubuntu ${codename}-updates main restricted universe multiverse" >>/etc/apt/sources.list
+        echo "#deb-src http://archive.ubuntu.com/ubuntu ${codename}-updates main restricted universe multiverse" >>/etc/apt/sources.list
         echo_progress_done "Repos enabled"
         apt_update
     fi

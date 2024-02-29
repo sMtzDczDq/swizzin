@@ -3,10 +3,10 @@
 # by liara for swizzin
 # copyright 2020 swizzin.ltd
 
-users=($(cut -d: -f1 < /etc/htpasswd))
+users=($(cut -d: -f1 </etc/htpasswd))
 
 if [[ ! -f /etc/nginx/apps/tmsindex.conf ]]; then
-    cat > /etc/nginx/apps/tmsindex.conf << DIN
+    cat >/etc/nginx/apps/tmsindex.conf <<DIN
 location /transmission.downloads {
     alias /home/\$remote_user/transmission/downloads;
     include /etc/nginx/snippets/fancyindex.conf;
@@ -21,7 +21,7 @@ DIN
 fi
 
 if [[ ! -f /etc/nginx/apps/transmission.conf ]]; then
-    cat > /etc/nginx/apps/transmission.conf << TCONF
+    cat >/etc/nginx/apps/transmission.conf <<TCONF
 location /transmission {
     return 301 /transmission/web/;
 }
@@ -50,7 +50,7 @@ for u in ${users[@]}; do
     fi
 
     timeout=0
-    while systemctl is-active transmission@"$u" > /dev/null; do
+    while systemctl is-active transmission@"$u" >/dev/null; do
         # echo "is active"
         timeout+=0.3
         if [[ $timeout -ge 20 ]]; then
@@ -61,10 +61,10 @@ for u in ${users[@]}; do
     done
 
     confpath="/home/${u}/.config/transmission-daemon/settings.json"
-    jq '.["rpc-bind-address"] = "127.0.0.1"' "$confpath" >> /root/logs/swizzin.log
-    RPCPORT=$(jq -r '.["rpc-port"]' < "$confpath")
+    jq '.["rpc-bind-address"] = "127.0.0.1"' "$confpath" >>/root/logs/swizzin.log
+    RPCPORT=$(jq -r '.["rpc-port"]' <"$confpath")
     if [[ ! -f /etc/nginx/conf.d/${u}.transmission.conf ]]; then
-        cat > /etc/nginx/conf.d/${u}.transmission.conf << TDCONF
+        cat >/etc/nginx/conf.d/${u}.transmission.conf <<TDCONF
 upstream ${u}.transmission {
     server 127.0.0.1:${RPCPORT};
 }

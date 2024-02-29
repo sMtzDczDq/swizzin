@@ -19,7 +19,7 @@ get_port() {
 check_service() {
     echo_log_only "Checking $1 service is active"
     systemctl -q is-active "$1" || {
-        systemctl status "$1" >> $log 2>&1
+        systemctl status "$1" >>$log 2>&1
         echo_warn "$1.service not active!"
         return 1
     }
@@ -36,7 +36,7 @@ check_nginx() {
     echo_log_only "Checking if $1 is reachable via nginx"
     master="$(_get_master_username)"
     password="$(_get_user_password "$master")"
-    curl --user "${master}:${password}" $extra_params -sSfLk https://127.0.0.1/"$1" -o /dev/null >> $log 2>&1 || {
+    curl --user "${master}:${password}" $extra_params -sSfLk https://127.0.0.1/"$1" -o /dev/null >>$log 2>&1 || {
         echo_warn "Querying https://127.0.0.1/$1 failed"
         return 1
     }
@@ -46,7 +46,7 @@ check_nginx() {
 # If $1 is not a number sequence, the ports are guessed off of the application name supplied via $1
 check_port_curl() {
     echo_log_only "Checking if port $1 is reachable via curl"
-    if [ "$1" -eq "$1" ] 2> /dev/null; then
+    if [ "$1" -eq "$1" ] 2>/dev/null; then
         port=$1
     else
         port=$(get_port "$1") || {
@@ -56,7 +56,7 @@ check_port_curl() {
     fi
     extra_params="$2"
 
-    curl -sSfLk $extra_params http://127.0.0.1:"$port" -o /dev/null >> $log 2>&1 || {
+    curl -sSfLk $extra_params http://127.0.0.1:"$port" -o /dev/null >>$log 2>&1 || {
         echo_warn "Querying http://127.0.0.1:$port failed"
         return 1
     }
@@ -66,7 +66,7 @@ check_port_curl() {
 # If $1 is not a number sequence, the ports are guessed off of the application name supplied via $1
 check_port() {
     echo_log_only "Checking if port $1 is open and listened to"
-    if [ "$1" -eq "$1" ] 2> /dev/null; then
+    if [ "$1" -eq "$1" ] 2>/dev/null; then
         port=$1
     else
         port=$(get_port "$1") || {
@@ -75,7 +75,7 @@ check_port() {
         }
     fi
 
-    lsof "-i:$port" >> $log 2>&1 || {
+    lsof "-i:$port" >>$log 2>&1 || {
         echo_warn "Port $port does not seem to be open"
         return 1
     }

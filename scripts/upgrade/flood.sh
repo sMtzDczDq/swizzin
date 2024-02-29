@@ -10,7 +10,7 @@ if ! test -n "$(find /home -mindepth 2 -maxdepth 2 -type d -name '.flood' -print
 fi
 
 echo_progress_start "Upgrading flood"
-npm install -g flood >> ${log} 2>&1
+npm install -g flood >>${log} 2>&1
 echo_progress_done
 
 for user in "${users[@]}"; do

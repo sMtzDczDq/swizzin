@@ -20,15 +20,15 @@ function _download_latest() {
     echo_progress_done
     echo_progress_start "Extracting mylar"
     mkdir -p /opt/mylar
-    tar xvf /tmp/mylar.tar.gz --directory /opt/mylar --strip-components=1 >> "${log}" 2>&1 || {
+    tar xvf /tmp/mylar.tar.gz --directory /opt/mylar --strip-components=1 >>"${log}" 2>&1 || {
         echo_error "Failed to extract."
         exit 1
     }
     rm -f /tmp/mylar.tar.gz
     echo_progress_done
     echo_progress_start "Fixing dependencies"
-    /opt/.venv/mylar/bin/pip install --upgrade pip &>> "${log}"
-    /opt/.venv/mylar/bin/pip install -r /opt/mylar/requirements.txt &>> "${log}"
+    /opt/.venv/mylar/bin/pip install --upgrade pip &>>"${log}"
+    /opt/.venv/mylar/bin/pip install -r /opt/mylar/requirements.txt &>>"${log}"
     # hotfix for urllib3 breaking stuff
     /opt/.venv/mylar/bin/pip install 'urllib3<2'
     chown -R "${mylar_owner}": /opt/mylar/
@@ -36,7 +36,7 @@ function _download_latest() {
 }
 
 function _service() {
-    cat > /etc/systemd/system/mylar.service << EOS
+    cat >/etc/systemd/system/mylar.service <<EOS
 [Unit]
 Description=Mylar service
 After=network-online.target

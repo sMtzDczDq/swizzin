@@ -17,7 +17,7 @@ _systemd() {
     fi
 
     echo_progress_start "Installing Systemd service"
-    cat > /etc/systemd/system/navidrome.service <<- SERV
+    cat >/etc/systemd/system/navidrome.service <<-SERV
 		[Unit]
 		Description=Navidrome Music Server and Streamer compatible with Subsonic/Airsonic
 		After=remote-fs.target network.target
@@ -66,13 +66,13 @@ _systemd() {
 		# You can customize some Navidrome config options by setting environment variables here. Ex:
 	SERV
     echo_progress_done "Navidrome service installed"
-} 2>> "${log}"
+} 2>>"${log}"
 
 _nginx() {
     if [[ -f /install/.nginx.lock ]]; then
         echo_progress_start "Configuring nginx for navidrome"
         bash /etc/swizzin/scripts/nginx/navidrome.sh
-        systemctl reload nginx &>> "${log}"
+        systemctl reload nginx &>>"${log}"
         echo_progress_done "Nginx configured for navidrome"
         echo_info "navidrome is now running on /navidrome"
     else
@@ -96,7 +96,7 @@ _navidromedirectories() {
 
 _navidromeconfig() {
     echo_progress_start "Installing configuration file"
-    cat > "/home/${user}/.config/navidrome/navidrome.toml" <<- SERV
+    cat >"/home/${user}/.config/navidrome/navidrome.toml" <<-SERV
 		MusicFolder = "/home/$user/music"
 		Port = "${http_port}"
 		Address = "0.0.0.0"
@@ -121,6 +121,6 @@ _systemd
 _nginx
 _navidromeowner
 
-systemctl enable -q --now navidrome.service &>> "${log}"
+systemctl enable -q --now navidrome.service &>>"${log}"
 touch "/install/.navidrome.lock"
 echo_success "navidrome installed"

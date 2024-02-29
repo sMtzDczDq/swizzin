@@ -29,23 +29,23 @@ if [[ -f /install/.lidarr.lock ]]; then
         echo_progress_start "Downloading netcore binaries"
         urlbase="https://lidarr.servarr.com/v1/update/develop/updatefile?os=linux&runtime=netcore"
         case "$(_os_arch)" in
-            "amd64") dlurl="${urlbase}&arch=x64" ;;
-            "armhf") dlurl="${urlbase}&arch=arm" ;;
-            "arm64") dlurl="${urlbase}&arch=arm64" ;;
-            *)
-                echo_error "Arch not supported"
-                exit 1
-                ;;
+        "amd64") dlurl="${urlbase}&arch=x64" ;;
+        "armhf") dlurl="${urlbase}&arch=arm" ;;
+        "arm64") dlurl="${urlbase}&arch=arm64" ;;
+        *)
+            echo_error "Arch not supported"
+            exit 1
+            ;;
         esac
 
-        if ! curl "$dlurl" -L -o /tmp/lidarr.tar.gz >> "$log" 2>&1; then
+        if ! curl "$dlurl" -L -o /tmp/lidarr.tar.gz >>"$log" 2>&1; then
             echo_error "Download failed, exiting"
             exit 1
         fi
         echo_progress_done "Binaries downloaded"
 
         echo_progress_start "Extracting archive"
-        tar xfv /tmp/lidarr.tar.gz --directory /opt/ >> $log 2>&1 || {
+        tar xfv /tmp/lidarr.tar.gz --directory /opt/ >>$log 2>&1 || {
             echo_error "Extraction failed. Please investigate. Exiting"
             exit 1
         }

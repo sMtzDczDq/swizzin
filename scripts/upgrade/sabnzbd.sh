@@ -1,5 +1,5 @@
 #!/bin/bash
-user=$(cut -d: -f1 < /root/.master.info)
+user=$(cut -d: -f1 </root/.master.info)
 
 if [[ ! -f /install/.sabnzbd.lock ]]; then
     echo_error "SABnzbd not detected. Exiting!"
@@ -53,7 +53,7 @@ if dpkg --compare-versions ${localversion:-0.0} lt ${latestversion}; then
     wget -q -O /tmp/sabnzbd.tar.gz "$latest"
     rm -rf /opt/sabnzbd
     mkdir -p /opt/sabnzbd
-    tar xzf /tmp/sabnzbd.tar.gz --strip-components=1 -C /opt/sabnzbd >> "$log" 2>&1
+    tar xzf /tmp/sabnzbd.tar.gz --strip-components=1 -C /opt/sabnzbd >>"$log" 2>&1
     chown -R ${user}: /opt/sabnzbd
     echo_progress_done
     if [[ -f /opt/.venv/sabnzbd/bin/python2 ]]; then
@@ -72,8 +72,8 @@ if dpkg --compare-versions ${localversion:-0.0} lt ${latestversion}; then
             sed -i 's/python2/python/g' /etc/systemd/system/sabnzbd.service
             systemctl daemon-reload
         fi
-        sudo -u ${user} bash -c "/opt/.venv/sabnzbd/bin/pip install --upgrade pip wheel" >> "${log}" 2>&1
-        sudo -u ${user} bash -c "/opt/.venv/sabnzbd/bin/pip install -r /opt/sabnzbd/requirements.txt" >> "$log" 2>&1
+        sudo -u ${user} bash -c "/opt/.venv/sabnzbd/bin/pip install --upgrade pip wheel" >>"${log}" 2>&1
+        sudo -u ${user} bash -c "/opt/.venv/sabnzbd/bin/pip install -r /opt/sabnzbd/requirements.txt" >>"$log" 2>&1
         echo_progress_done
     fi
     rm /tmp/sabnzbd.tar.gz
@@ -82,7 +82,7 @@ if dpkg --compare-versions ${localversion:-0.0} lt ${latestversion}; then
     if [[ $latestversion =~ ^3\.0\.[1-2] ]]; then
         sed -i "s/feedparser.*/feedparser<6.0.0/g" /opt/sabnzbd/requirements.txt
     fi
-    sudo -u ${user} bash -c "/opt/.venv/sabnzbd/bin/pip install -r /opt/sabnzbd/requirements.txt" >> "$log" 2>&1
+    sudo -u ${user} bash -c "/opt/.venv/sabnzbd/bin/pip install -r /opt/sabnzbd/requirements.txt" >>"$log" 2>&1
     echo_progress_done
     systemctl try-restart sabnzbd
     echo_info "SABnzbd has been upgraded to version ${latestversion}!"

@@ -12,7 +12,7 @@
 codename=$(lsb_release -cs)
 _install() {
 
-    user=$(cut -d: -f1 < /root/.master.info)
+    user=$(cut -d: -f1 </root/.master.info)
     . /etc/swizzin/sources/functions/pyenv
     systempy3_ver=$(get_candidate_version python3)
 
@@ -21,16 +21,16 @@ _install() {
     fi
 
     case ${PYENV} in
-        True)
-            pyenv_install
-            pyenv_install_version 3.11.3
-            pyenv_create_venv 3.11.3 /opt/.venv/bazarr
-            chown -R ${user}: /opt/.venv/bazarr
-            ;;
-        *)
-            apt_install python3-pip python3-dev python3-venv
-            python3_venv ${user} bazarr
-            ;;
+    True)
+        pyenv_install
+        pyenv_install_version 3.11.3
+        pyenv_create_venv 3.11.3 /opt/.venv/bazarr
+        chown -R ${user}: /opt/.venv/bazarr
+        ;;
+    *)
+        apt_install python3-pip python3-dev python3-venv
+        python3_venv ${user} bazarr
+        ;;
     esac
 
     if [[ $(_os_arch) =~ "arm" ]]; then
@@ -38,7 +38,7 @@ _install() {
     fi
 
     echo_progress_start "Downloading bazarr source"
-    wget https://github.com/morpheus65535/bazarr/releases/latest/download/bazarr.zip -O /tmp/bazarr.zip >> $log 2>&1 || {
+    wget https://github.com/morpheus65535/bazarr/releases/latest/download/bazarr.zip -O /tmp/bazarr.zip >>$log 2>&1 || {
         echo_error "Failed to download"
         exit 1
     }
@@ -47,7 +47,7 @@ _install() {
     echo_progress_start "Extracting zip"
     rm -rf /opt/bazarr
     mkdir /opt/bazarr
-    unzip /tmp/bazarr.zip -d /opt/bazarr >> $log 2>&1 || {
+    unzip /tmp/bazarr.zip -d /opt/bazarr >>$log 2>&1 || {
         echo_error "Failed to extract zip"
         exit 1
     }
@@ -57,7 +57,7 @@ _install() {
     chown -R "${user}": /opt/bazarr
 
     echo_progress_start "Installing python dependencies"
-    sudo -u "${user}" bash -c "/opt/.venv/bazarr/bin/pip3 install -r /opt/bazarr/requirements.txt" >> $log 2>&1 || {
+    sudo -u "${user}" bash -c "/opt/.venv/bazarr/bin/pip3 install -r /opt/bazarr/requirements.txt" >>$log 2>&1 || {
         echo_error "Dependencies failed to install"
         exit 1
     }
@@ -82,7 +82,7 @@ _config() {
             sonarr_config="false"
         fi
 
-        cat >> /opt/bazarr/data/config/config.ini << SONC
+        cat >>/opt/bazarr/data/config/config.ini <<SONC
 [sonarr]
 apikey = ${sonarrapi} 
 full_update = Daily
@@ -112,7 +112,7 @@ SONC
             radarr_config="false"
         fi
 
-        cat >> /opt/bazarr/data/config/config.ini << RADC
+        cat >>/opt/bazarr/data/config/config.ini <<RADC
 
 [radarr]
 apikey = ${radarrapi}
@@ -126,22 +126,22 @@ RADC
         echo_progress_done
     fi
 
-    cat >> /opt/bazarr/data/config/config.ini << BAZC
+    cat >>/opt/bazarr/data/config/config.ini <<BAZC
 [general]
 ip = 0.0.0.0
 base_url = /
 BAZC
 
     if [[ -f /install/.sonarr.lock ]] && [[ "${sonarr_config}" == "true" ]]; then
-        echo "use_sonarr = True" >> /opt/bazarr/data/config/config.ini
+        echo "use_sonarr = True" >>/opt/bazarr/data/config/config.ini
     else
-        echo "use_sonarr = False" >> /opt/bazarr/data/config/config.ini
+        echo "use_sonarr = False" >>/opt/bazarr/data/config/config.ini
     fi
 
     if [[ -f /install/.radarr.lock ]] && [[ "${radarr_config}" == "true" ]]; then
-        echo "use_radarr = True" >> /opt/bazarr/data/config/config.ini
+        echo "use_radarr = True" >>/opt/bazarr/data/config/config.ini
     else
-        echo "use_radarr = False" >> /opt/bazarr/data/config/config.ini
+        echo "use_radarr = False" >>/opt/bazarr/data/config/config.ini
 
     fi
 }
@@ -162,7 +162,7 @@ _nginx() {
 
 _systemd() {
     echo_progress_start "Creating and starting service"
-    cat > /etc/systemd/system/bazarr.service << BAZ
+    cat >/etc/systemd/system/bazarr.service <<BAZ
 [Unit]
 Description=Bazarr for ${user}
 After=syslog.target network.target

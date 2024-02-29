@@ -14,13 +14,13 @@
 function _download() {
     echo_progress_start "Downloading install script"
     cd /tmp
-    wget https://nzbget.net/download/nzbget-latest-bin-linux.run >> $log 2>&1
+    wget https://nzbget.net/download/nzbget-latest-bin-linux.run >>$log 2>&1
     echo_progress_done
 }
 
 function _service() {
     echo_progress_start "Installing systemd service"
-    cat > /etc/systemd/system/nzbget@.service << NZBGD
+    cat >/etc/systemd/system/nzbget@.service <<NZBGD
 [Unit]
 Description=NZBGet Daemon
 Documentation=http://nzbget.net/Documentation
@@ -45,7 +45,7 @@ function _install() {
     cd /tmp
     for u in "${users[@]}"; do
         echo_progress_start "Installing nzbget for $u"
-        sh nzbget-latest-bin-linux.run --destdir /home/$u/nzbget >> $log 2>&1
+        sh nzbget-latest-bin-linux.run --destdir /home/$u/nzbget >>$log 2>&1
         chown -R $u:$u /home/$u/nzbget
         if [[ $u == $master ]]; then
             :
@@ -92,8 +92,8 @@ function _cleanup() {
     rm -rf nzbget-latest-bin-linux.run
 }
 
-users=($(cut -d: -f1 < /etc/htpasswd))
-master=$(cut -d: -f1 < /root/.master.info)
+users=($(cut -d: -f1 </etc/htpasswd))
+master=$(cut -d: -f1 </root/.master.info)
 noexec=$(grep "/tmp" /etc/fstab | grep noexec)
 
 if [[ -n $noexec ]]; then

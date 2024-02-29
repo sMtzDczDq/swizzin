@@ -8,10 +8,10 @@
 #   changes/dates in source files. Any modifications to our software
 #   including (via compiler) GPL-licensed code must also be made available
 #   under the GPL along with build & install instructions.
-MASTER=$(cut -d: -f1 < /root/.master.info)
+MASTER=$(cut -d: -f1 </root/.master.info)
 isactive=$(systemctl is-active shellinabox)
 if [[ ! -f /etc/nginx/apps/shell.conf ]]; then
-    cat > /etc/nginx/apps/shell.conf << RAD
+    cat >/etc/nginx/apps/shell.conf <<RAD
 location /shell/ {
   include /etc/nginx/snippets/proxy.conf;
   proxy_pass        http://127.0.0.1:4200;

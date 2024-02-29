@@ -3,7 +3,7 @@
 if [[ -f /install/.medusa.lock ]]; then
     if [[ -f /etc/systemd/system/medusa@.service ]]; then
         echo_progress_start "Moving medusa to a python venv"
-        user=$(cut -d: -f1 < /root/.master.info)
+        user=$(cut -d: -f1 </root/.master.info)
         isactive=$(systemctl is-active medusa@${user})
 
         if [[ $isactive == "active" ]]; then
@@ -19,7 +19,7 @@ if [[ -f /install/.medusa.lock ]]; then
         chown -R ${user}: /opt/.venv/medusa
         mv /home/${user}/.medusa /opt/medusa
 
-        cat > /etc/systemd/system/medusa.service << MSD
+        cat >/etc/systemd/system/medusa.service <<MSD
 [Unit]
 Description=Medusa
 After=syslog.target network.target

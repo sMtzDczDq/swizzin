@@ -1,7 +1,7 @@
 #!/bin/bash
 
 find /home -mindepth 1 -maxdepth 1 -type d -exec chmod 750 {} \;
-master=$(cut -d: -f1 < /root/.master.info)
+master=$(cut -d: -f1 </root/.master.info)
 if [[ -f /install/.plex.lock ]]; then
     if [[ -z $(groups plex | grep ${master}) ]]; then
         echo_progress_start "Adding ${master} to plex group"
@@ -17,7 +17,7 @@ fi
 if grep -q 'export PATH=$PATH:/usr/local/bin/swizzin' /root/.bashrc; then
     :
 else
-    echo 'export PATH=$PATH:/usr/local/bin/swizzin' >> /root/.bashrc
+    echo 'export PATH=$PATH:/usr/local/bin/swizzin' >>/root/.bashrc
 fi
 
 # Ensure .config dir is correctly owned

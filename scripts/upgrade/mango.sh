@@ -27,7 +27,7 @@ if [[ $? != 0 ]]; then
     echo_error "Failed to query github"
     exit 1
 fi
-wget "${dlurl}" -O $mangodir/mango >> $log 2>&1
+wget "${dlurl}" -O $mangodir/mango >>$log 2>&1
 chmod +x "$mangodir"/mango
 echo_progress_done
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-username="$(cut -d: -f1 < /root/.master.info)"
+username="$(cut -d: -f1 </root/.master.info)"
 #
 function remove_filebrowser() {
     systemctl stop -q "filebrowser.service"
@@ -9,7 +9,7 @@ function remove_filebrowser() {
     #
     rm -f "/etc/systemd/system/filebrowser.service"
     #
-    kill -9 $(ps xU ${username} | grep "/home/${username}/bin/filebrowser -d /home/${username}/.config/Filebrowser/filebrowser.db$" | awk '{print $1}') > /dev/null 2>&1
+    kill -9 $(ps xU ${username} | grep "/home/${username}/bin/filebrowser -d /home/${username}/.config/Filebrowser/filebrowser.db$" | awk '{print $1}') >/dev/null 2>&1
     #
     rm -f "/home/${username}/bin/filebrowser"
     rm -rf "/home/${username}/.config/Filebrowser"

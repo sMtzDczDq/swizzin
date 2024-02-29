@@ -8,12 +8,12 @@ _install() {
     npm_install
 
     echo_progress_start "Installing flood"
-    npm install --global flood >> "${log}" 2>&1
+    npm install --global flood >>"${log}" 2>&1
     echo_progress_done "Flood installed"
 }
 
 _systemd() {
-    cat > /etc/systemd/system/flood@.service << EOF
+    cat >/etc/systemd/system/flood@.service <<EOF
 [Unit]
 Description=Flood Web UI
 After=network.target
@@ -42,7 +42,7 @@ _nginx() {
 _flood_port() {
     flood_port=$(port 3300 3400)
     mkdir -p /home/${user}/.config/flood
-    echo "FLOOD_PORT=${flood_port}" > /home/${user}/.config/flood/env
+    echo "FLOOD_PORT=${flood_port}" >/home/${user}/.config/flood/env
     chown -R ${user}: /home/${user}/.config/flood
 }
 
@@ -65,7 +65,7 @@ readarray -t users < <(_get_user_list)
 for user in "${users[@]}"; do
     echo_progress_start "Assigning flood port to $user and starting service"
     _flood_port
-    systemctl enable --now flood@${user} >> ${log} 2>&1
+    systemctl enable --now flood@${user} >>${log} 2>&1
     echo_progress_done "Done"
 done
 

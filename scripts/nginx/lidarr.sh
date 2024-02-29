@@ -18,7 +18,7 @@ app_servicefile="${app_name}.service"
 app_branch="master"
 
 echo_log_only "Installing nginx config"
-cat > /etc/nginx/apps/$app_name.conf << ARRNGINX
+cat >/etc/nginx/apps/$app_name.conf <<ARRNGINX
 location ^~ /$app_baseurl {
     proxy_pass http://127.0.0.1:$app_port;
     proxy_set_header Host \$host;
@@ -59,7 +59,7 @@ fi
 
 apikey=$(grep -oPm1 "(?<=<ApiKey>)[^<]+" "$app_configdir"/config.xml)
 
-cat > "$app_configdir"/config.xml << ARRCONFIG
+cat >"$app_configdir"/config.xml <<ARRCONFIG
 <Config>
   <LogLevel>info</LogLevel>
   <UpdateMechanism>BuiltIn</UpdateMechanism>

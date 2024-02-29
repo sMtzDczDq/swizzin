@@ -11,8 +11,8 @@ if [[ -z $duck_subdomain ]] || [[ -z $duck_token ]]; then
     echo_query "Would you like to continue?" "y/N"
     read -r yn
     case $yn in
-        [Yy]*) : ;;
-        *) exit 0 ;;
+    [Yy]*) : ;;
+    *) exit 0 ;;
     esac
 fi
 
@@ -53,7 +53,7 @@ if [[ ! -d $duckPath ]]; then
 fi
 
 echo_progress_start "Installing duckdns update script"
-cat > $duckScript << EOS
+cat >$duckScript <<EOS
 subdomain=$subdomain
 token=$token
 
@@ -69,13 +69,13 @@ if [ "$checkCron" -eq 0 ]; then
     crontab -l | {
         cat
         echo "*/5 * * * * bash $duckScript"
-    } | crontab - >> $log 2>&1
+    } | crontab - >>$log 2>&1
 fi
 echo_progress_done
 
 ## Running script
 echo_progress_start "Registering domain with Duck DNS"
-bash $duckScript >> "$log" 2>&1
+bash $duckScript >>"$log" 2>&1
 response=$(cat $duckLog)
 if [ "$response" != "OK" ]; then
     echo_error "Duck DNS did not update correctly. Please check your settings or run the setup again."

@@ -2,7 +2,7 @@
 # Medusa installer for swizzin
 # Author: liara
 
-user=$(cut -d: -f1 < /root/.master.info)
+user=$(cut -d: -f1 </root/.master.info)
 #shellcheck source=sources/functions/utils
 . /etc/swizzin/sources/functions/utils
 
@@ -21,7 +21,7 @@ if [[ -n $active ]]; then
     fi
     if [[ $disable == "yes" ]]; then
         echo_progress_start "Disabling service"
-        systemctl disable -q --now ${active} >> ${log} 2>&1
+        systemctl disable -q --now ${active} >>${log} 2>&1
         echo_progress_done
     else
         exit 1
@@ -43,13 +43,13 @@ install_rar
 
 echo_progress_start "Cloning medusa source code"
 cd /opt/
-git clone https://github.com/pymedusa/Medusa.git medusa >> ${log} 2>&1
+git clone https://github.com/pymedusa/Medusa.git medusa >>${log} 2>&1
 chown -R ${user}:${user} medusa
 echo_progress_done
 
 echo_progress_start "Installing systemd service"
 
-cat > /etc/systemd/system/medusa.service << MSD
+cat >/etc/systemd/system/medusa.service <<MSD
 [Unit]
 Description=Medusa
 After=syslog.target network.target

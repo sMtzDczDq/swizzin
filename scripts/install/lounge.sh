@@ -7,17 +7,17 @@ function _install() {
     useradd lounge --system -m -d /opt/lounge
 
     echo_progress_start "Installing lounge from npm"
-    yarn --non-interactive global add thelounge >> $log 2>&1 || {
+    yarn --non-interactive global add thelounge >>$log 2>&1 || {
         echo_error "Lounge failed to install"
         exit 1
     }
-    yarn --non-interactive cache clean >> $log 2>&1
-    sudo -u lounge bash -c "thelounge install thelounge-theme-zenburn" >> $log 2>&1
+    yarn --non-interactive cache clean >>$log 2>&1
+    sudo -u lounge bash -c "thelounge install thelounge-theme-zenburn" >>$log 2>&1
     echo_progress_done
 
     mkdir -p /opt/lounge/.thelounge/
 
-    cat > /opt/lounge/.thelounge/config.js << 'EOF'
+    cat >/opt/lounge/.thelounge/config.js <<'EOF'
 "use strict";
 
 module.exports = {
@@ -513,7 +513,7 @@ EOF
     fi
 
     echo_progress_start "Installing systemd service"
-    cat > /etc/systemd/system/lounge.service << EOSD
+    cat >/etc/systemd/system/lounge.service <<EOSD
 [Unit]
 Description=The Lounge IRC client
 After=znc.service
@@ -539,16 +539,16 @@ EOSD
 }
 
 function _adduser() {
-    master=$(cut -d: -f1 < /root/.master.info)
+    master=$(cut -d: -f1 </root/.master.info)
     for u in "${users[@]}"; do
         echo_progress_start "Adding $u to lounge"
         if [[ $u = "$master" ]]; then
-            password=$(cut -d: -f2 < /root/.master.info)
+            password=$(cut -d: -f2 </root/.master.info)
         else
-            password=$(cut -d: -f2 < /root/$u.info)
+            password=$(cut -d: -f2 </root/$u.info)
         fi
         crypt=$(node /usr/local/share/.config/yarn/global/node_modules/bcryptjs/bin/bcrypt "${password}")
-        cat > /opt/lounge/.thelounge/users/$u.json << EOU
+        cat >/opt/lounge/.thelounge/users/$u.json <<EOU
 {
 	"password": "${crypt}",
 	"log": true,
@@ -562,7 +562,7 @@ EOU
     chown -R lounge: /opt/lounge
 }
 
-users=($(cut -d: -f1 < /etc/htpasswd))
+users=($(cut -d: -f1 </etc/htpasswd))
 
 if [[ -n $1 ]]; then
     users=$1

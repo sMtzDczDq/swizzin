@@ -9,14 +9,14 @@
 #   including (via compiler) GPL-licensed code must also be made available
 #   under the GPL along with build & install instructions.
 
-user=$(cut -d: -f1 < /root/.master.info)
+user=$(cut -d: -f1 </root/.master.info)
 isactive=$(systemctl is-active bazarr)
 
 if [[ $isactive == "active" ]]; then
     systemctl stop bazarr
 fi
 
-cat > /etc/nginx/apps/bazarr.conf << BAZN
+cat >/etc/nginx/apps/bazarr.conf <<BAZN
 location /bazarr/ {
     proxy_pass              http://127.0.0.1:6767/bazarr/;
     proxy_set_header        X-Real-IP               \$remote_addr;

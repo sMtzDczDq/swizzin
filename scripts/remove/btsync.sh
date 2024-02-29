@@ -17,13 +17,13 @@
 #   including (via compiler) GPL-licensed code must also be made available
 #   under the GPL along with build & install instructions.
 #
-MASTER=$(cut -d: -f1 < /root/.master.info)
+MASTER=$(cut -d: -f1 </root/.master.info)
 
 function _removeBTSync() {
     systemctl stop -q resilio-sync
     apt_remove --purge resilio-sync*
-    deluser rslsync >> "${log}" 2>&1
-    delgroup rslsync >> "${log}" 2>&1
+    deluser rslsync >>"${log}" 2>&1
+    delgroup rslsync >>"${log}" 2>&1
     if [[ -d /home/rslsync ]]; then
         rm -rf /home/rslsync
     fi

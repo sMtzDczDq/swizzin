@@ -8,14 +8,14 @@
 #   changes/dates in source files. Any modifications to our software
 #   including (via compiler) GPL-licensed code must also be made available
 #   under the GPL along with build & install instructions.
-user=$(cut -d: -f1 < /root/.master.info)
+user=$(cut -d: -f1 </root/.master.info)
 isactive=$(systemctl is-active medusa)
 if [[ $isactive == "active" ]]; then
     systemctl stop medusa
 fi
 
 if [[ ! -f /etc/nginx/apps/medusa.conf ]]; then
-    cat > /etc/nginx/apps/medusa.conf << SRC
+    cat >/etc/nginx/apps/medusa.conf <<SRC
 location /medusa {
   proxy_pass http://127.0.0.1:8081/medusa;
   proxy_set_header Host \$host;

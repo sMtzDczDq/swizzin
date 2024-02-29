@@ -9,12 +9,12 @@ if [[ -f /install/.jfago.lock ]]; then
         echo_log_only "jfago was $isactive"
         [[ $isactive == "active" ]] && systemctl stop jfago -q
 
-        useradd -r jfago -s /usr/sbin/nologin > /dev/null 2>&1
+        useradd -r jfago -s /usr/sbin/nologin >/dev/null 2>&1
         mkdir -p /opt/jfago/
         mv /root/.config/jfa-go/ /opt/jfago/config
         chown jfago: /opt/jfago -R
 
-        cat > /etc/systemd/system/jfago.service << EOF
+        cat >/etc/systemd/system/jfago.service <<EOF
 [Unit]
 Description=An account management system for Jellyfin.
 After=network.target

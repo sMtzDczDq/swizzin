@@ -18,7 +18,7 @@ function _remove_navidrome() {
 
     if [[ -f /install/.nginx.lock ]]; then
         rm_if_exists /etc/nginx/apps/navidrome.conf
-        systemctl reload -q nginx &>> "${log}"
+        systemctl reload -q nginx &>>"${log}"
     fi
 
     rm_if_exists /install/.navidrome.lock

@@ -35,31 +35,31 @@ apt_install $LIST
 install_rar
 
 case ${PYENV} in
-    True)
-        pyenv_install
-        pyenv_install_version 3.11.3
-        pyenv_create_venv 3.11.3 /opt/.venv/sabnzbd
-        chown -R ${user}: /opt/.venv/sabnzbd
-        ;;
-    *)
-        python3_venv ${user} sabnzbd
-        ;;
+True)
+    pyenv_install
+    pyenv_install_version 3.11.3
+    pyenv_create_venv 3.11.3 /opt/.venv/sabnzbd
+    chown -R ${user}: /opt/.venv/sabnzbd
+    ;;
+*)
+    python3_venv ${user} sabnzbd
+    ;;
 esac
 
 echo_progress_start "Downloading and extracting sabnzbd"
 mkdir -p /opt/sabnzbd
-wget -O /tmp/sabnzbd.tar.gz "$latest" >> "${log}" 2>&1 || {
+wget -O /tmp/sabnzbd.tar.gz "$latest" >>"${log}" 2>&1 || {
     echo_error "Failed to download archive"
     exit 1
 }
-tar xzf /tmp/sabnzbd.tar.gz --strip-components=1 -C /opt/sabnzbd >> "${log}" 2>&1
+tar xzf /tmp/sabnzbd.tar.gz --strip-components=1 -C /opt/sabnzbd >>"${log}" 2>&1
 rm -rf /tmp/sabnzbd.tar.gz
 echo_progress_done
 
 echo_progress_start "Installing pip requirements"
 
-/opt/.venv/sabnzbd/bin/pip install --upgrade pip wheel >> "${log}" 2>&1
-/opt/.venv/sabnzbd/bin/pip install -r /opt/sabnzbd/requirements.txt >> "${log}" 2>&1
+/opt/.venv/sabnzbd/bin/pip install --upgrade pip wheel >>"${log}" 2>&1
+/opt/.venv/sabnzbd/bin/pip install -r /opt/sabnzbd/requirements.txt >>"${log}" 2>&1
 echo_progress_done
 
 chown -R ${user}: /opt/.venv/sabnzbd
@@ -67,7 +67,7 @@ mkdir -p /home/${user}/.config/sabnzbd
 mkdir -p /home/${user}/Downloads/{complete,incomplete}
 
 echo_progress_start "Installing systemd service"
-cat > /etc/systemd/system/sabnzbd.service << SABSD
+cat >/etc/systemd/system/sabnzbd.service <<SABSD
 [Unit]
 Description=Sabnzbd
 Wants=network-online.target
@@ -84,7 +84,7 @@ WantedBy=multi-user.target
 SABSD
 
 echo_progress_start "Configuring SABnzbd"
-cat > /home/${user}/.config/sabnzbd/sabnzbd.ini << SAB_INI
+cat >/home/${user}/.config/sabnzbd/sabnzbd.ini <<SAB_INI
 [misc]
 host_whitelist = $(hostname -f), $(hostname)
 host = 0.0.0.0

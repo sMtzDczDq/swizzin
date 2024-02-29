@@ -1,5 +1,5 @@
 #!/bin/bash
-username=$(cut -d: -f1 < /root/.master.info)
+username=$(cut -d: -f1 </root/.master.info)
 
 rm -r /home/$username/Jackett
 rm /install/.jackett.lock

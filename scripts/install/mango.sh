@@ -12,23 +12,23 @@ function _install_mango() {
     mango_latest=$(github_latest_version getmango/Mango)
 
     case "$(_os_arch)" in
-        "arm32" | "arm64")
-            echo_error "Currently unsupported but might be in the future. Please check back later!\nhttps://github.com/hkalexling/Mango/issues/131"
-            exit 1
-            ;;
-        "amd64")
-            dlurl="https://github.com/getmango/Mango/releases/download/${mango_latest}/mango"
-            ;;
-        *)
-            echo_error "Unsupported arch?"
-            exit 1
-            ;;
+    "arm32" | "arm64")
+        echo_error "Currently unsupported but might be in the future. Please check back later!\nhttps://github.com/hkalexling/Mango/issues/131"
+        exit 1
+        ;;
+    "amd64")
+        dlurl="https://github.com/getmango/Mango/releases/download/${mango_latest}/mango"
+        ;;
+    *)
+        echo_error "Unsupported arch?"
+        exit 1
+        ;;
     esac
     echo_log_only "dlurl = $dlurl"
 
     mkdir -p "$mangodir"
     mkdir -p "$mangodir"/library
-    wget "${dlurl}" -O $mangodir/mango >> "$log" 2>&1 || {
+    wget "${dlurl}" -O $mangodir/mango >>"$log" 2>&1 || {
         echo_error "Failed to download binary"
         exit 1
     }
@@ -37,7 +37,7 @@ function _install_mango() {
     chmod +x $mangodir/mango
     chmod o+rx -R $mangodir $mangodir/library
 
-    useradd $mangousr --system -d "$mangodir" >> $log 2>&1
+    useradd $mangousr --system -d "$mangodir" >>$log 2>&1
     sudo chown -R $mangousr:$mangousr $mangodir
 
 }
@@ -45,7 +45,7 @@ function _install_mango() {
 # Creating systemd unit
 function _mkservice_mango() {
     echo_progress_start "Installing systemd service"
-    cat > /etc/systemd/system/mango.service << SYSD
+    cat >/etc/systemd/system/mango.service <<SYSD
 # Service file example for Mango
 [Unit]
 Description=Mango - Manga Server and Web Reader
@@ -89,8 +89,8 @@ _addusers_mango() {
 
 ########## MAIN
 
-master=$(cut -d: -f1 < /root/.master.info)
-users=($(cut -d: -f1 < /etc/htpasswd))
+master=$(cut -d: -f1 </root/.master.info)
+users=($(cut -d: -f1 </etc/htpasswd))
 
 if [[ -n $1 ]]; then
     users=("$1")

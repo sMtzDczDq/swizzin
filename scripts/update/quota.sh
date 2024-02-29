@@ -3,7 +3,7 @@
 if [[ -f /install/.quota.lock ]]; then
     if [[ ! -f /etc/sudoers.d/quota ]]; then
         echo_progress_start "Updating sudoers for quota"
-        cat > /etc/sudoers.d/quota << EOSUD
+        cat >/etc/sudoers.d/quota <<EOSUD
 #Defaults  env_keep -="HOME"
 Defaults:www-data !logfile
 Defaults:www-data !syslog

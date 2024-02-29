@@ -13,7 +13,7 @@ for user in "${users[@]}"; do
 
     check_service "wg-quick@wg$(id -u "$user")" || BAD=true
 
-    wg show wg"$(id -u "$user")" >> $log 2>&1 || {
+    wg show wg"$(id -u "$user")" >>$log 2>&1 || {
         BAD=true
         echo_warn "wg Interface for $user is down"
     }

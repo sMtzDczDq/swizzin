@@ -30,7 +30,7 @@ ask() {
 
         # Read the answer (use /dev/tty in case stdin is redirected from somewhere else)
         # shellcheck disable=SC2162
-        read reply < /dev/tty
+        read reply </dev/tty
 
         # Default?
         if [ -z "$reply" ]; then
@@ -39,8 +39,8 @@ ask() {
 
         # Check if the reply is valid
         case "$reply" in
-            Y* | y*) return 0 ;;
-            N* | n*) return 1 ;;
+        Y* | y*) return 0 ;;
+        N* | n*) return 1 ;;
         esac
 
     done

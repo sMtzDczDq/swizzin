@@ -3,7 +3,7 @@
 
 if [[ -f /install/.sickrage.lock ]]; then
     echo_progress_start "Updating SickRage to SickChill"
-    user=$(cut -d: -f1 < /root/.master.info)
+    user=$(cut -d: -f1 </root/.master.info)
     active=$(systemctl is-active sickrage@$user)
     if [[ $active == 'active' ]]; then
         systemctl disable -q --now sickrage@$user
@@ -17,7 +17,7 @@ if [[ -f /install/.sickrage.lock ]]; then
     echo_warn "Moving ~/.sickrage to ~/sickrage.defunct. You can safely delete this yourself if the upgrade completes successfully."
     mv .sickrage sickrage.defunct
     rm -f /etc/systemd/system/sickrage@.service
-    cat > /etc/systemd/system/sickchill@.service << SSS
+    cat >/etc/systemd/system/sickchill@.service <<SSS
 [Unit]
 Description=SickChill
 After=syslog.target network.target
@@ -35,7 +35,7 @@ WantedBy=multi-user.target
 SSS
     if [[ -f /install/.nginx.lock ]]; then
         rm -f /etc/nginx/apps/sickrage.conf
-        cat > /etc/nginx/apps/sickchill.conf << SRC
+        cat >/etc/nginx/apps/sickchill.conf <<SRC
 location /sickchill {
     include /etc/nginx/snippets/proxy.conf;
     proxy_pass        http://127.0.0.1:8081/sickchill;
@@ -66,7 +66,7 @@ if [[ -f /install/.sickchill.lock ]]; then
             active=$(systemctl is-active sickchill)
             unit=sickchill
         fi
-        systemctl disable -q --now ${unit} >> ${log} 2>&1
+        systemctl disable -q --now ${unit} >>${log} 2>&1
         rm_if_exists /opt/.venv/sickchill
         LIST='git python3-dev python3-venv python3-pip'
         apt_install $LIST
@@ -78,11 +78,11 @@ if [[ -f /install/.sickchill.lock ]]; then
         if [[ -d /home/${user}/.sickchill ]]; then
             mv /home/${user}/.sickchill /opt/sickchill
         fi
-        sudo -u ${user} bash -c "cd /opt/sickchill; git pull" >> $log 2>&1
+        sudo -u ${user} bash -c "cd /opt/sickchill; git pull" >>$log 2>&1
         # echo "Installing requirements.txt with pip ..."
-        sudo -u ${user} bash -c "/opt/.venv/sickchill/bin/pip3 install -r /opt/sickchill/requirements.txt" >> $log 2>&1
+        sudo -u ${user} bash -c "/opt/.venv/sickchill/bin/pip3 install -r /opt/sickchill/requirements.txt" >>$log 2>&1
 
-        cat > /etc/systemd/system/sickchill.service << SCSD
+        cat >/etc/systemd/system/sickchill.service <<SCSD
 [Unit]
 Description=SickChill
 After=syslog.target network.target

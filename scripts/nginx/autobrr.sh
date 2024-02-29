@@ -6,7 +6,7 @@
 . /etc/swizzin/sources/functions/utils
 users=($(_get_user_list))
 
-cat > /etc/nginx/apps/autobrr.conf << 'AUTOBRR'
+cat >/etc/nginx/apps/autobrr.conf <<'AUTOBRR'
 location /autobrr/ {
     proxy_pass              http://$remote_user.autobrr;
     proxy_http_version      1.1;
@@ -21,7 +21,7 @@ AUTOBRR
 
 for user in ${users[@]}; do
     port=$(grep 'port =' /home/${user}/.config/autobrr/config.toml | awk '{ print $3 }')
-    cat > /etc/nginx/conf.d/${user}.autobrr.conf << AUTOBRRUC
+    cat >/etc/nginx/conf.d/${user}.autobrr.conf <<AUTOBRRUC
 upstream ${user}.autobrr {
   server 127.0.0.1:${port};
 }

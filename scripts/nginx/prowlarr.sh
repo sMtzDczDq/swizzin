@@ -17,7 +17,7 @@ app_baseurl="$app_name"
 app_servicefile="${app_name}.service"
 app_branch="develop"
 
-cat > /etc/nginx/apps/$app_name.conf << ARRNGINX
+cat >/etc/nginx/apps/$app_name.conf <<ARRNGINX
 location ^~ /$app_baseurl {
     proxy_pass http://127.0.0.1:$app_port;
     proxy_set_header Host \$host;
@@ -50,7 +50,7 @@ apikey=$(grep -oPm1 "(?<=<ApiKey>)[^<]+" "$app_configdir"/config.xml)
 
 # Set to Debug as this is alpha software
 # ToDo: Logs back to Info
-cat > "$app_configdir"/config.xml << ARRCONFIG
+cat >"$app_configdir"/config.xml <<ARRCONFIG
 <Config>
   <LogLevel>debug</LogLevel>
   <UpdateMechanism>BuiltIn</UpdateMechanism>

@@ -23,7 +23,7 @@
 # THE SOFTWARE.
 
 usage() {
-    cat << USAGE
+    cat <<USAGE
 Usage: $(basename $0) [-connect CONN] -r <code>
 
 Options:
@@ -36,7 +36,7 @@ USAGE
 }
 
 main() {
-    echo "<?php $PHPCODE" > $PHPFPMCLI_FILE
+    echo "<?php $PHPCODE" >$PHPFPMCLI_FILE
     SCRIPT_FILENAME=$PHPFPMCLI_FILE \
         REQUEST_METHOD=GET \
         cgi-fcgi -bind -connect "$CONN" | stripheaders
@@ -57,28 +57,28 @@ PHPCODE=""
 init() {
     until [ -z "$1" ]; do
         case "$1" in
-            -connect | --connect)
-                shift
-                CONN="$1"
-                shift
-                ;;
+        -connect | --connect)
+            shift
+            CONN="$1"
+            shift
+            ;;
 
-            -r)
-                shift
-                PHPCODE="$1"
-                shift
-                ;;
+        -r)
+            shift
+            PHPCODE="$1"
+            shift
+            ;;
 
-            help | -h | -help | --help)
-                usage
-                exit 0
-                ;;
+        help | -h | -help | --help)
+            usage
+            exit 0
+            ;;
 
-            *)
-                echo_error "unknown option: $1"
-                usage
-                exit 1
-                ;;
+        *)
+            echo_error "unknown option: $1"
+            usage
+            exit 1
+            ;;
         esac
     done
     if [ -z "$PHPCODE" ]; then

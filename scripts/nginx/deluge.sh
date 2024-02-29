@@ -8,14 +8,14 @@
 #   changes/dates in source files. Any modifications to our software
 #   including (via compiler) GPL-licensed code must also be made available
 #   under the GPL along with build & install instructions.
-users=($(cut -d: -f1 < /etc/htpasswd))
+users=($(cut -d: -f1 </etc/htpasswd))
 
 if [[ -n $1 ]]; then
     users=($1)
 fi
 
 if [[ ! -f /etc/nginx/apps/dindex.conf ]]; then
-    cat > /etc/nginx/apps/dindex.conf << DIN
+    cat >/etc/nginx/apps/dindex.conf <<DIN
 location /deluge.downloads {
   alias /home/\$remote_user/torrents/deluge;
   include /etc/nginx/snippets/fancyindex.conf;
@@ -46,7 +46,7 @@ for u in "${users[@]}"; do
 
     if [[ ! -f /etc/nginx/conf.d/${u}.deluge.conf ]]; then
         DWPORT=$(grep port /home/$u/.config/deluge/web.conf | cut -d: -f2 | sed 's/ //g' | sed 's/,//g')
-        cat > /etc/nginx/conf.d/${u}.deluge.conf << DUPS
+        cat >/etc/nginx/conf.d/${u}.deluge.conf <<DUPS
 upstream $u.deluge {
   server 127.0.0.1:$DWPORT;
 }
@@ -54,7 +54,7 @@ DUPS
     fi
 
     if [[ ! -f /etc/nginx/apps/deluge.conf ]]; then
-        cat > /etc/nginx/apps/deluge.conf << 'DRP'
+        cat >/etc/nginx/apps/deluge.conf <<'DRP'
 location /deluge {
   return 301 /deluge/;
 }

@@ -17,12 +17,12 @@
 #   including (via compiler) GPL-licensed code must also be made available
 #   under the GPL along with build & install instructions.
 #
-MASTER=$(cut -d: -f1 < /root/.master.info)
+MASTER=$(cut -d: -f1 </root/.master.info)
 BTSYNCIP=$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')
 
 function _installBTSync1() {
-    echo "deb [signed-by=/usr/share/keyrings/btsync-archive-keyring.gpg] http://linux-packages.resilio.com/resilio-sync/deb resilio-sync non-free" > /etc/apt/sources.list.d/btsync.list
-    curl -s https://linux-packages.resilio.com/resilio-sync/key.asc | gpg --dearmor > /usr/share/keyrings/btsync-archive-keyring.gpg 2>> "${log}"
+    echo "deb [signed-by=/usr/share/keyrings/btsync-archive-keyring.gpg] http://linux-packages.resilio.com/resilio-sync/deb resilio-sync non-free" >/etc/apt/sources.list.d/btsync.list
+    curl -s https://linux-packages.resilio.com/resilio-sync/key.asc | gpg --dearmor >/usr/share/keyrings/btsync-archive-keyring.gpg 2>>"${log}"
     apt_update
 }
 
@@ -37,7 +37,7 @@ function _installBTSync4() {
     chown ${MASTER}: -R /home/${MASTER}/.config/
 }
 function _installBTSync5() {
-    cat > /etc/resilio-sync/config.json << RSCONF
+    cat >/etc/resilio-sync/config.json <<RSCONF
 {
     "listening_port" : 0,
     "storage_path" : "/home/${MASTER}/.config/resilio-sync/",
@@ -57,8 +57,8 @@ RSCONF
 function _installBTSync6() {
     touch /install/.btsync.lock
     systemctl enable -q resilio-sync 2>&1 | tee -a $log
-    systemctl start resilio-sync >> $log 2>&1
-    systemctl restart resilio-sync >> $log 2>&1
+    systemctl start resilio-sync >>$log 2>&1
+    systemctl restart resilio-sync >>$log 2>&1
 }
 
 echo_progress_start "Installing btsync keys and sources"

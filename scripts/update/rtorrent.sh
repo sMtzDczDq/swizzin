@@ -1,11 +1,11 @@
 #!/bin/bash
-users=($(cut -d: -f1 < /etc/htpasswd))
+users=($(cut -d: -f1 </etc/htpasswd))
 
 for u in "${users[@]}"; do
     # Create tmpfiles.d for user if not exists
     if [[ ! -f /etc/tmpfiles.d/${u}.conf ]]; then
         echo_progress_start "Creating rtorrent tmpfiles.d for ${u}"
-        echo "D /var/run/${u} 0750 ${u} ${u} -" >> /etc/tmpfiles.d/${u}.conf
+        echo "D /var/run/${u} 0750 ${u} ${u} -" >>/etc/tmpfiles.d/${u}.conf
         systemd-tmpfiles /etc/tmpfiles.d/${u}.conf --create
         echo_progress_done
     fi

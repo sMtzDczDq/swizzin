@@ -9,7 +9,7 @@
 #   including (via compiler) GPL-licensed code must also be made available
 #   under the GPL along with build & install instructions.
 
-cat > /etc/nginx/apps/ombi.conf << 'RAD'
+cat >/etc/nginx/apps/ombi.conf <<'RAD'
 location /ombi {		
      return 301 $scheme://$host/ombi/;		
 }
@@ -41,7 +41,7 @@ if [[ $status = "active" ]]; then
 fi
 
 mkdir -p /etc/systemd/system/ombi.service.d
-cat > /etc/systemd/system/ombi.service.d/override.conf << CONF
+cat >/etc/systemd/system/ombi.service.d/override.conf <<CONF
 [Service]
 ExecStart=
 ExecStart=/opt/Ombi/Ombi --baseurl /ombi --host http://127.0.0.1:3000 --storage /etc/Ombi

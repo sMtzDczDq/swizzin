@@ -26,15 +26,15 @@ fi
 apt_install "${dependency_list[@]}"
 
 case "${pyenv_install}" in
-    true)
-        pyenv_install
-        pyenv_install_version 3.8.1
-        pyenv_create_venv 3.8.1 /opt/.venv/mylar
-        chown -R "${mylar_owner}": /opt/.venv/mylar
-        ;;
-    *)
-        python3_venv "${mylar_owner}" mylar
-        ;;
+true)
+    pyenv_install
+    pyenv_install_version 3.8.1
+    pyenv_create_venv 3.8.1 /opt/.venv/mylar
+    chown -R "${mylar_owner}": /opt/.venv/mylar
+    ;;
+*)
+    python3_venv "${mylar_owner}" mylar
+    ;;
 esac
 
 _download_latest
@@ -47,7 +47,7 @@ echo_progress_done
 
 echo_progress_start "Configuring Mylar"
 mkdir -p "/home/${mylar_owner}/.config/mylar/"
-cat > "/home/${mylar_owner}/.config/mylar/config.ini" << EOF
+cat >"/home/${mylar_owner}/.config/mylar/config.ini" <<EOF
 [Interface]
 http_port = ${http_port}
 http_host = 0.0.0.0
@@ -70,7 +70,7 @@ fi
 echo_progress_start "Installing systemd service"
 _service
 systemctl -q daemon-reload
-systemctl enable -q --now mylar >> "${log}" 2>&1
+systemctl enable -q --now mylar >>"${log}" 2>&1
 echo_progress_done "Mylar started"
 echo_success "Mylar installed"
 touch /install/.mylar.lock

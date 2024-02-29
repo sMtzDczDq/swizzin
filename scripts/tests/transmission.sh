@@ -18,7 +18,7 @@ for user in "${users[@]}"; do
     }
 
     extra_params="--user $user:$(_get_user_password "$user")"
-    port=$(jq -r ".[\"rpc-port\"]" < "/home/$user/.config/transmission-daemon/settings.json")
+    port=$(jq -r ".[\"rpc-port\"]" <"/home/$user/.config/transmission-daemon/settings.json")
     check_port_curl "$port" "$extra_params" || BAD=true
 done
 

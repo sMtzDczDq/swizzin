@@ -163,17 +163,17 @@ function colorprint() {
     body="$2"
     # If the optional logfile was specified...
     if [[ -n $log ]]; then
-        printf '%b' "${dim}[$(LANG=en_US date +"%a %b %d %T")]${nc} " | strip_ansi >> "$log"
+        printf '%b' "${dim}[$(LANG=en_US date +"%a %b %d %T")]${nc} " | strip_ansi >>"$log"
         # ...and if function called was `echo_log_only`, do not print to stdout ad forward straight to file
         # echo "${FUNCNAME[ 1 ]}"
         if [[ ${FUNCNAME[1]} == "echo_log_only" ]]; then
-            printf '%b\n' "${heading}${body}${nc}" | strip_ansi >> "$log"
+            printf '%b\n' "${heading}${body}${nc}" | strip_ansi >>"$log"
         else # otherwise append it
             #Wrapped for the user
             printf '%b' "${heading}"
             printf '%b\n' "${body}${nc}" | do_the_wrap
             #Unwrapped for the log
-            printf '%b\n' "${heading}${body}${nc}" | strip_ansi >> "$log"
+            printf '%b\n' "${heading}${body}${nc}" | strip_ansi >>"$log"
         fi
     else # If log was not specified...
         printf '%b' "${heading}"

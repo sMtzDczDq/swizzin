@@ -7,7 +7,7 @@ if [[ -f /install/.nextcloud.lock ]]; then
         . /etc/swizzin/sources/functions/php
         phpversion=$(php_service_version)
         sock="php${phpversion}-fpm"
-        cat > /etc/nginx/apps/nextcloud.conf << EOF
+        cat >/etc/nginx/apps/nextcloud.conf <<EOF
 # The following 2 rules are only needed for the user_webfinger app.
 # Uncomment it if you're planning to use this app.
 #rewrite ^/.well-known/host-meta /nextcloud/public.php?service=host-meta last;

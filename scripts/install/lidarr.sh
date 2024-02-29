@@ -29,23 +29,23 @@ install() {
 
     urlbase="https://lidarr.servarr.com/v1/update/master/updatefile?os=linux&runtime=netcore"
     case "$(_os_arch)" in
-        "amd64") dlurl="${urlbase}&arch=x64" ;;
-        "armhf") dlurl="${urlbase}&arch=arm" ;;
-        "arm64") dlurl="${urlbase}&arch=arm64" ;;
-        *)
-            echo_error "Arch not supported"
-            exit 1
-            ;;
+    "amd64") dlurl="${urlbase}&arch=x64" ;;
+    "armhf") dlurl="${urlbase}&arch=arm" ;;
+    "arm64") dlurl="${urlbase}&arch=arm64" ;;
+    *)
+        echo_error "Arch not supported"
+        exit 1
+        ;;
     esac
 
-    if ! curl "$dlurl" -L -o /tmp/lidarr.tar.gz >> "$log" 2>&1; then
+    if ! curl "$dlurl" -L -o /tmp/lidarr.tar.gz >>"$log" 2>&1; then
         echo_error "Download failed, exiting"
         exit 1
     fi
     echo_progress_done "Archive downloaded"
 
     echo_progress_start "Extracting archive"
-    tar xfv /tmp/lidarr.tar.gz --directory /opt/ >> $log 2>&1 || {
+    tar xfv /tmp/lidarr.tar.gz --directory /opt/ >>$log 2>&1 || {
         echo_error "Failed to extract"
         exit 1
     }
@@ -58,7 +58,7 @@ config() {
 
     echo_progress_start "Creating configuration and service files"
     if [[ ! -d /home/${user}/.config/Lidarr/ ]]; then mkdir -p "/home/${user}/.config/Lidarr/"; fi
-    cat > "/home/${user}/.config/Lidarr/config.xml" << LID
+    cat >"/home/${user}/.config/Lidarr/config.xml" <<LID
 <Config>
   <Port>8686</Port>
   <UrlBase>lidarr</UrlBase>
@@ -73,7 +73,7 @@ LID
     chown -R "${user}": "/home/${user}/.config"
 }
 systemd() {
-    cat > /etc/systemd/system/lidarr.service << LID
+    cat >/etc/systemd/system/lidarr.service <<LID
 [Unit]
 Description=Lidarr
 After=syslog.target network.target

@@ -8,13 +8,13 @@
 #   changes/dates in source files. Any modifications to our software
 #   including (via compiler) GPL-licensed code must also be made available
 #   under the GPL along with build & install instructions.
-MASTER=$(cut -d: -f1 < /root/.master.info)
+MASTER=$(cut -d: -f1 </root/.master.info)
 isactive=$(systemctl is-active tautulli)
 if [[ $isactive == "active" ]]; then
     systemctl stop tautulli
 fi
 if [[ ! -f /etc/nginx/apps/tautulli.conf ]]; then
-    cat > /etc/nginx/apps/tautulli.conf << RAD
+    cat >/etc/nginx/apps/tautulli.conf <<RAD
 location /plexpy {
   return 301 /tautulli/;
 }

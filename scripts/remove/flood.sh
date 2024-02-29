@@ -17,7 +17,7 @@ if [[ -f /install/.flood.lock ]]; then
     systemctl reload nginx
 fi
 
-npm -g remove flood >> "$log" 2>&1
+npm -g remove flood >>"$log" 2>&1
 
 rm -f /etc/systemd/system/flood@.service
 rm -f /install/.flood.lock

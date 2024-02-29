@@ -5,7 +5,7 @@
 users=($(_get_user_list))
 
 if [[ ! -f /etc/nginx/apps/qbtindex.conf ]]; then
-    cat > /etc/nginx/apps/qbtindex.conf << DIN
+    cat >/etc/nginx/apps/qbtindex.conf <<DIN
 location /qbittorrent.downloads {
     alias /home/\$remote_user/torrents/qbittorrent;
     include /etc/nginx/snippets/fancyindex.conf;
@@ -20,7 +20,7 @@ DIN
 fi
 
 if [[ ! -f /etc/nginx/apps/qbittorrent.conf ]]; then
-    cat > /etc/nginx/apps/qbittorrent.conf << 'QBTN'
+    cat >/etc/nginx/apps/qbittorrent.conf <<'QBTN'
 location /qbt {
     return 301 /qbittorrent/;
 }
@@ -54,7 +54,7 @@ fi
 
 for user in ${users[@]}; do
     port=$(grep 'WebUI\\Port' /home/${user}/.config/qBittorrent/qBittorrent.conf | cut -d= -f2)
-    cat > /etc/nginx/conf.d/${user}.qbittorrent.conf << QBTUC
+    cat >/etc/nginx/conf.d/${user}.qbittorrent.conf <<QBTUC
 upstream ${user}.qbittorrent {
   server 127.0.0.1:${port};
 }
@@ -62,11 +62,11 @@ QBTUC
     if grep -q 'WebUI\\Address=\*' /home/${user}/.config/qBittorrent/qBittorrent.conf; then
         active=$(systemctl is-active qbittorrent@${user})
         if [[ $active == "active" ]]; then
-            systemctl stop qbittorrent@${user} >> ${log} 2>&1
+            systemctl stop qbittorrent@${user} >>${log} 2>&1
         fi
         sed -i 's|WebUI\\Address=.*|WebUI\\Address=127.0.0.1|g' /home/${user}/.config/qBittorrent/qBittorrent.conf
         if [[ $active == "active" ]]; then
-            systemctl start qbittorrent@${user} >> ${log} 2>&1
+            systemctl start qbittorrent@${user} >>${log} 2>&1
         fi
     fi
 done

@@ -16,7 +16,7 @@
 #   under the GPL along with build & install instructions.
 #
 
-master=$(cut -d: -f1 < /root/.master.info)
+master=$(cut -d: -f1 </root/.master.info)
 
 echo_info "Please visit https://www.plex.tv/claim, login, copy your plex claim token to your clipboard and paste it here. This will automatically claim your server! Otherwise, you can leave this blank and to tunnel to the port instead."
 echo_query "Insert your Plex claim token" "e.g. 'claim-...' or blank"
@@ -29,8 +29,8 @@ read 'claim'
 
 echo_progress_start "Installing plex keys and sources ... "
 apt_install apt-transport-https
-curl -s https://downloads.plex.tv/plex-keys/PlexSign.key | gpg --dearmor > /usr/share/keyrings/plex-archive-keyring.gpg 2>> "${log}"
-echo "deb [signed-by=/usr/share/keyrings/plex-archive-keyring.gpg] https://downloads.plex.tv/repo/deb public main" > /etc/apt/sources.list.d/plexmediaserver.list
+curl -s https://downloads.plex.tv/plex-keys/PlexSign.key | gpg --dearmor >/usr/share/keyrings/plex-archive-keyring.gpg 2>>"${log}"
+echo "deb [signed-by=/usr/share/keyrings/plex-archive-keyring.gpg] https://downloads.plex.tv/repo/deb public main" >/etc/apt/sources.list.d/plexmediaserver.list
 echo
 
 apt_update
@@ -54,7 +54,7 @@ if [[ -n $claim ]]; then
     claimPlex ${claim}
 fi
 
-systemctl restart plexmediaserver >> $log 2>&1
+systemctl restart plexmediaserver >>$log 2>&1
 
 touch /install/.plex.lock
 

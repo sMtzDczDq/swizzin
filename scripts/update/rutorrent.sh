@@ -8,8 +8,8 @@ if [ -f /install/.rutorrent.lock ]; then
         sudo -u www-data git -C "$cqbdir" fetch
         if [[ ! $(sudo -u www-data git -C "$cqbdir" rev-parse HEAD) == $(sudo -u www-data git -C "$cqbdir" rev-parse @{u}) ]]; then
             echo_progress_start "Updating rutorrent theme"
-            sudo -u www-data git -C "$cqbdir" reset HEAD --hard >> $log 2>&1
-            sudo -u www-data git -C "$cqbdir" pull >> $log 2>&1
+            sudo -u www-data git -C "$cqbdir" reset HEAD --hard >>$log 2>&1
+            sudo -u www-data git -C "$cqbdir" pull >>$log 2>&1
             echo_progress_done
         fi
     fi
@@ -38,11 +38,11 @@ if [ -f /install/.rutorrent.lock ]; then
     fi
 
     if [[ -f /install/.flood.lock ]]; then
-        users=($(cut -d: -f1 < /etc/htpasswd))
+        users=($(cut -d: -f1 </etc/htpasswd))
         for user in ${users[@]}; do
             if [[ ! -f /etc/nginx/apps/${user}.scgi.conf ]]; then
                 reloadnginx=1
-                cat > /etc/nginx/apps/${user}.scgi.conf << RUC
+                cat >/etc/nginx/apps/${user}.scgi.conf <<RUC
 location /${user} {
     include scgi_params;
     scgi_pass unix:/var/run/${user}/.rtorrent.sock;
@@ -60,7 +60,7 @@ RUC
         echo_progress_done
     fi
 
-    if [[ -f /install/.quota.lock ]] && { ! grep -q "/usr/bin/quota -wu" /srv/rutorrent/plugins/diskspace/action.php > /dev/null 2>&1 || [[ ! $(grep -ic cachedEcho::send /srv/rutorrent/plugins/diskspace/action.php) == 2 ]]; }; then
+    if [[ -f /install/.quota.lock ]] && { ! grep -q "/usr/bin/quota -wu" /srv/rutorrent/plugins/diskspace/action.php >/dev/null 2>&1 || [[ ! $(grep -ic cachedEcho::send /srv/rutorrent/plugins/diskspace/action.php) == 2 ]]; }; then
         echo_progress_start "Fixing quota ruTorrent plugin"
         . /etc/swizzin/sources/functions/rutorrent
         rutorrent_fix_quota

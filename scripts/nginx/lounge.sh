@@ -3,7 +3,7 @@
 
 isactive=$(systemctl is-active lounge)
 
-cat > /etc/nginx/apps/lounge.conf << EOF
+cat >/etc/nginx/apps/lounge.conf <<EOF
 location /irc/ {
 proxy_pass http://127.0.0.1:9000/;
 proxy_http_version 1.1;

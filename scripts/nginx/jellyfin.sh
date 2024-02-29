@@ -21,7 +21,7 @@ if [[ -f /install/.jellyfin.lock ]]; then
 fi
 #
 # Create our nginx application conf for jellyfin
-cat > /etc/nginx/apps/jellyfin.conf <<- NGINXCONF
+cat >/etc/nginx/apps/jellyfin.conf <<-NGINXCONF
 	location /jellyfin {
 		proxy_pass https://127.0.0.1:8920;
 		#

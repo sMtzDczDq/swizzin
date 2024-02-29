@@ -52,19 +52,19 @@ function le_znc_hook() {
                 return 1
             }
             if [[ -z ${Le_PostHook} ]]; then
-                cat /etc/nginx/ssl/"${defaulthost}"/{key,fullchain}.pem > /home/znc/.znc/znc.pem
+                cat /etc/nginx/ssl/"${defaulthost}"/{key,fullchain}.pem >/home/znc/.znc/znc.pem
                 BASE64CMD=$(echo -n "cat /etc/nginx/ssl/${defaulthost}/{key,fullchain}.pem > /home/znc/.znc/znc.pem" | base64 -w 0)
                 sed -i "s/Le_PostHook=.*/Le_PostHook='__ACME_BASE64__START_${BASE64CMD}__ACME_BASE64__END_'/g" /root/.acme.sh/"${defaulthostDir}"/"${defaulthost}".conf
             elif [[ ${Le_PostHook} =~ ("ACME_BASE64") ]]; then
                 POSTDECODE=$(echo -n "${Le_PostHook}" | sed -e "s/__ACME_BASE64__START_//g" -e "s/__ACME_BASE64__END_//g" | base64 -d)
                 if [[ ! "$POSTDECODE" =~ ("znc") ]]; then
-                    cat /etc/nginx/ssl/"${defaulthost}"/{key,fullchain}.pem > /home/znc/.znc/znc.pem
+                    cat /etc/nginx/ssl/"${defaulthost}"/{key,fullchain}.pem >/home/znc/.znc/znc.pem
                     POSTDECODE="cat /etc/nginx/ssl/${defaulthost}/{key,fullchain}.pem > /home/znc/.znc/znc.pem; ${POSTDECODE}"
                     POSTENCODE=$(echo -n "${POSTDECODE}" | base64 -w 0)
                     sed -i "s/Le_PostHook=.*/Le_PostHook='__ACME_BASE64__START_${POSTENCODE}__ACME_BASE64__END_'/g" /root/.acme.sh/"${defaulthostDir}"/"${defaulthost}".conf
                 fi
             elif [[ ! ${Le_PostHook} =~ ("znc") ]]; then
-                cat /etc/nginx/ssl/"${defaulthost}"/{key,fullchain}.pem > /home/znc/.znc/znc.pem
+                cat /etc/nginx/ssl/"${defaulthost}"/{key,fullchain}.pem >/home/znc/.znc/znc.pem
                 sed -i "s/Le_PostHook=.*/Le_PostHook='cat /etc/nginx/ssl/${defaulthost}/{key,fullchain}.pem > /home/znc/.znc/znc.pem; ${Le_PostHook}'/g" /root/.acme.sh/"${defaulthostDir}"/"${defaulthost}".conf
             fi
         fi

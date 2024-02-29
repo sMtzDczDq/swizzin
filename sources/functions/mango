@@ -13,7 +13,7 @@ function _mkconf_mango() {
         mangobase="/"
     fi
 
-    cat > "$mangodir/.config/mango/config.yml" << CONF
+    cat >"$mangodir/.config/mango/config.yml" <<CONF
 #Please do not edit as swizzin will be replacing this file as updates roll out. 
 port: 9003
 base_url: $mangobase

@@ -58,7 +58,7 @@ function _install_calibreweb() {
         exit 1
     }
 
-    wget -q "${dlurl}" -O /tmp/calibreweb.zip >> $log 2>&1 || {
+    wget -q "${dlurl}" -O /tmp/calibreweb.zip >>$log 2>&1 || {
         echo_error "Failed to download source code"
         exit 1
     }
@@ -66,30 +66,30 @@ function _install_calibreweb() {
     echo_progress_done
 
     echo_progress_start "Extracting archive"
-    unzip /tmp/calibreweb.zip -d /tmp/calibrewebdir >> $log 2>&1
+    unzip /tmp/calibreweb.zip -d /tmp/calibrewebdir >>$log 2>&1
     subdir=$(ls /tmp/calibrewebdir)
     mv /tmp/calibrewebdir/"$subdir" $calibrewebdir
     echo_progress_done
 
     echo_progress_start "Creating users and setting permissions"
-    useradd $clbWebUser --system -d "$calibrewebdir" >> $log 2>&1
+    useradd $clbWebUser --system -d "$calibrewebdir" >>$log 2>&1
     chown -R $clbWebUser:$clbWebUser $calibrewebdir
     chown -R ${clbWebUser}: /opt/.venv/calibreweb
     #This bit right here will ensure that the system user created will have access to the master user's folders where he might have the CalibreDB
-    usermod -a -G "${CALIBRE_LIBRARY_USER}" $clbWebUser >> $log 2>&1
+    usermod -a -G "${CALIBRE_LIBRARY_USER}" $clbWebUser >>$log 2>&1
     echo_progress_done
 
     echo_progress_start "Installing python dependencies"
-    sudo -u ${clbWebUser} bash -c "/opt/.venv/calibreweb/bin/pip3 install -r $calibrewebdir/requirements.txt" >> $log 2>&1
+    sudo -u ${clbWebUser} bash -c "/opt/.venv/calibreweb/bin/pip3 install -r $calibrewebdir/requirements.txt" >>$log 2>&1
     #fuck ldap. all my homies hate ldap
     sed '/ldap/Id' -i $calibrewebdir/optional-requirements.txt
-    sudo -u ${clbWebUser} bash -c "/opt/.venv/calibreweb/bin/pip3 install -r $calibrewebdir/optional-requirements.txt" >> $log 2>&1
+    sudo -u ${clbWebUser} bash -c "/opt/.venv/calibreweb/bin/pip3 install -r $calibrewebdir/optional-requirements.txt" >>$log 2>&1
     echo_progress_done
 }
 
 _install_kepubify() {
     echo_progress_start "Installing kepubify"
-    wget -q "https://github.com/pgaskin/kepubify/releases/download/v3.1.2/kepubify-linux-64bit" -O /tmp/kepubify >> $log 2>&1
+    wget -q "https://github.com/pgaskin/kepubify/releases/download/v3.1.2/kepubify-linux-64bit" -O /tmp/kepubify >>$log 2>&1
     chmod a+x /tmp/kepubify
     mv /tmp/kepubify /usr/local/bin/kepubify
     #TODO and figure out if it's needed for all cases or not
@@ -109,7 +109,7 @@ _nginx_calibreweb() {
 
 _systemd_calibreweb() {
     echo_progress_start "Creating and enabling systemd services"
-    cat > /etc/systemd/system/calibreweb.service << EOF
+    cat >/etc/systemd/system/calibreweb.service <<EOF
 [Unit]
 Description=calibreweb
 
@@ -142,7 +142,7 @@ _post_libdir() {
     }
     curl -s -k 'http://127.0.0.1:8083/basicconfig' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8' --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
         --data-urlencode "config_calibre_dir=$CALIBRE_LIBRARY_PATH" \
-        --data-urlencode "submit=" >> "$log" || {
+        --data-urlencode "submit=" >>"$log" || {
         echo_log_only "curl fucked"
         return 1
     }
@@ -152,7 +152,7 @@ _post_libdir() {
 _post_changepass() {
     sleep 5
     pass="$(_get_user_password "$CALIBRE_LIBRARY_USER")"
-    /opt/.venv/calibreweb/bin/python3 /opt/calibreweb/cps.py -s admin:"${pass}" >> "$log" 2>&1 || {
+    /opt/.venv/calibreweb/bin/python3 /opt/calibreweb/cps.py -s admin:"${pass}" >>"$log" 2>&1 || {
         echo_info "Could not change password, please use admin:admin123 to log in and change credentials immediately."
         return 1
     }

@@ -2,7 +2,7 @@
 # SickChill installer for swizzin
 # Author: liara
 
-user=$(cut -d: -f1 < /root/.master.info)
+user=$(cut -d: -f1 </root/.master.info)
 codename=$(lsb_release -cs)
 . /etc/swizzin/sources/functions/pyenv
 . /etc/swizzin/sources/functions/utils
@@ -32,23 +32,23 @@ fi
 LIST='git python3-dev python3-venv python3-pip'
 apt_install $LIST
 echo_progress_start "Installing venv for sickchill"
-python3 -m venv /opt/.venv/sickchill >> ${log} 2>&1
+python3 -m venv /opt/.venv/sickchill >>${log} 2>&1
 echo_progress_done
 
 chown -R ${user}: /opt/.venv/sickchill
 echo_progress_start "Cloning SickChill"
-git clone https://github.com/SickChill/SickChill.git /opt/sickchill >> ${log} 2>&1
+git clone https://github.com/SickChill/SickChill.git /opt/sickchill >>${log} 2>&1
 chown -R $user: /opt/sickchill
 echo_progress_done
 
 echo_progress_start "Installing requirements.txt with pip"
-sudo -u ${user} bash -c "/opt/.venv/sickchill/bin/pip3 install -r /opt/sickchill/requirements.txt" >> $log 2>&1
+sudo -u ${user} bash -c "/opt/.venv/sickchill/bin/pip3 install -r /opt/sickchill/requirements.txt" >>$log 2>&1
 echo_progress_done
 
 install_rar
 
 echo_progress_start "Installing systemd service"
-cat > /etc/systemd/system/sickchill.service << SCSD
+cat >/etc/systemd/system/sickchill.service <<SCSD
 [Unit]
 Description=SickChill
 After=syslog.target network.target

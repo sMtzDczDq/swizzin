@@ -24,7 +24,7 @@ function organizr_install() {
 
     if [[ ! -d $organizr_dir ]]; then
         echo_progress_start "Cloning the Organizr Repo"
-        git clone -b v2-master https://github.com/causefx/Organizr $organizr_dir --depth 1 >> "$log" 2>&1
+        git clone -b v2-master https://github.com/causefx/Organizr $organizr_dir --depth 1 >>"$log" 2>&1
         chown -R www-data:www-data $organizr_dir
         chmod 0700 -R $organizr_dir
         echo_progress_done "Organizr cloned"
@@ -49,8 +49,8 @@ function organizr_setup() {
     chown -R www-data:www-data ${organizr_dir}_db
     chmod 0700 -R $organizr_dir
 
-    user=$(cut -d: -f1 < /root/.master.info)
-    pass=$(cut -d: -f2 < /root/.master.info)
+    user=$(cut -d: -f1 </root/.master.info)
+    pass=$(cut -d: -f2 </root/.master.info)
 
     #TODO check that passwords with weird characters will send right
     if [[ $user == "$pass" ]]; then
@@ -62,7 +62,7 @@ function organizr_setup() {
         reg_pass="$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c16)"
         form_key="$(php -r "echo password_hash(substr(\"$hash_key\", 2, 10), PASSWORD_BCRYPT);")"
 
-        cat > /root/.organizr << EOF
+        cat >/root/.organizr <<EOF
 api_key = $api_key
 hash_key = $hash_key
 reg_pass = $reg_pass
@@ -84,7 +84,7 @@ EOF
             --data-urlencode "dbName=orgdb" \
             --data-urlencode "dbPath=${organizr_dir}_db" \
             --data-urlencode "formKey=${form_key}_db" \
-            -sk >> "$log" 2>&1
+            -sk >>"$log" 2>&1
 
         # sleep 10
         curl -k https://127.0.0.1/organizr/api/functions.php
@@ -98,13 +98,13 @@ function organizr_f2b() {
     echo_progress_start "Setting up Fail2Ban for organizr"
 
     touch /srv/organizr_db/organizrLoginLog.json
-    cat > /etc/fail2ban/filter.d/organizr-auth.conf << EOF
+    cat >/etc/fail2ban/filter.d/organizr-auth.conf <<EOF
 [Definition]
 failregex = ","username":"\S+","ip":"<HOST>","auth_type":"error"}*
 ignoreregex =
 EOF
 
-    cat > /etc/fail2ban/jail.d/organizr-auth.conf << EOF
+    cat >/etc/fail2ban/jail.d/organizr-auth.conf <<EOF
 [organizr-auth]
 enabled = true
 port = http,https
@@ -113,7 +113,7 @@ logpath = /srv/organizr_db/organizrLoginLog.json
 ignoreip = 127.0.0.1/24
 EOF
 
-    fail2ban-client reload >> "$log" 2>&1
+    fail2ban-client reload >>"$log" 2>&1
     echo_progress_done "Fail2Ban configured"
 }
 

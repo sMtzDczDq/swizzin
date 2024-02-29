@@ -12,11 +12,11 @@ killage() {
     kill -13 $(ps --pid $$ -oppid=)
     exit 1
 }
-if ! command -v apt_install > /dev/null 2>&1; then
+if ! command -v apt_install >/dev/null 2>&1; then
     killage "Apt functions unavailable"
 fi
 
-if ! command -v echo_error > /dev/null 2>&1; then
+if ! command -v echo_error >/dev/null 2>&1; then
     killage "Echo functions unavailable"
 fi
 
@@ -24,7 +24,7 @@ if [[ -z $log ]]; then
     killage "Log variable not set"
 fi
 
-if ! swizdb list > /dev/null 2>&1; then
+if ! swizdb list >/dev/null 2>&1; then
     killage "SwizDB list command unavailable"
 fi
 

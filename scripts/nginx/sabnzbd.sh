@@ -8,7 +8,7 @@
 #   changes/dates in source files. Any modifications to our software
 #   including (via compiler) GPL-licensed code must also be made available
 #   under the GPL along with build & install instructions.
-user=$(cut -d: -f1 < /root/.master.info)
+user=$(cut -d: -f1 </root/.master.info)
 active=$(systemctl is-active sabnzbd)
 
 if [[ $active == "active" ]]; then
@@ -16,7 +16,7 @@ if [[ $active == "active" ]]; then
 fi
 
 if [[ ! -f /etc/nginx/apps/sabnzbd.conf ]]; then
-    cat > /etc/nginx/apps/sabnzbd.conf << SAB
+    cat >/etc/nginx/apps/sabnzbd.conf <<SAB
 location /sabnzbd {
   include /etc/nginx/snippets/proxy.conf;
   proxy_pass        http://127.0.0.1:65080/sabnzbd;

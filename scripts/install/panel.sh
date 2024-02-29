@@ -27,7 +27,7 @@ fi
 
 master=$(_get_master_username)
 
-useradd -r swizzin -s /usr/sbin/nologin > /dev/null 2>&1
+useradd -r swizzin -s /usr/sbin/nologin >/dev/null 2>&1
 
 systempy3_ver=$(get_candidate_version python3)
 
@@ -41,24 +41,24 @@ fi
 apt_install $LIST
 
 case ${PYENV} in
-    True)
-        pyenv_install
-        pyenv_install_version 3.8.6
-        pyenv_create_venv 3.8.6 /opt/.venv/swizzin
-        chown -R swizzin: /opt/.venv/swizzin
-        ;;
-    *)
-        python3_venv swizzin swizzin
-        ;;
+True)
+    pyenv_install
+    pyenv_install_version 3.8.6
+    pyenv_create_venv 3.8.6 /opt/.venv/swizzin
+    chown -R swizzin: /opt/.venv/swizzin
+    ;;
+*)
+    python3_venv swizzin swizzin
+    ;;
 esac
 
 echo_progress_start "Cloning panel"
-git clone https://github.com/liaralabs/swizzin_dashboard.git /opt/swizzin >> ${log} 2>&1
+git clone https://github.com/liaralabs/swizzin_dashboard.git /opt/swizzin >>${log} 2>&1
 echo_progress_done "Panel cloned"
 
 echo_progress_start "Installing python dependencies"
-/opt/.venv/swizzin/bin/pip install --upgrade pip wheel >> ${log} 2>&1
-/opt/.venv/swizzin/bin/pip install -r /opt/swizzin/requirements.txt >> ${log} 2>&1
+/opt/.venv/swizzin/bin/pip install --upgrade pip wheel >>${log} 2>&1
+/opt/.venv/swizzin/bin/pip install -r /opt/swizzin/requirements.txt >>${log} 2>&1
 echo_progress_done
 
 echo_progress_start "Setting permissions"
@@ -75,7 +75,7 @@ fi
 if [[ $master == $(id -nu 1000) ]]; then
     :
 else
-    echo "ADMIN_USER = '$master'" >> /opt/swizzin/swizzin.cfg
+    echo "ADMIN_USER = '$master'" >>/opt/swizzin/swizzin.cfg
 fi
 echo_progress_done
 
@@ -86,7 +86,7 @@ systemctl reload nginx
 echo_progress_done
 
 echo_progress_start "Installing systemd service"
-cat > /etc/systemd/system/panel.service << EOS
+cat >/etc/systemd/system/panel.service <<EOS
 [Unit]
 Description=swizzin panel service
 After=nginx.service
@@ -104,7 +104,7 @@ TimeoutStopSec=300
 WantedBy=multi-user.target
 EOS
 
-cat > /etc/sudoers.d/panel << EOSUD
+cat >/etc/sudoers.d/panel <<EOSUD
 #Defaults  env_keep -="HOME"
 Defaults:swizzin !logfile
 Defaults:swizzin !syslog
@@ -116,7 +116,7 @@ Cmnd_Alias   SYSDCMNDS = /bin/systemctl start *, /bin/systemctl stop *, /bin/sys
 swizzin     ALL = (ALL) NOPASSWD: CMNDS, SYSDCMNDS
 EOSUD
 
-systemctl enable -q --now panel >> ${log} 2>&1
+systemctl enable -q --now panel >>${log} 2>&1
 echo_progress_done "Panel started"
 
 echo_success "Panel installed"

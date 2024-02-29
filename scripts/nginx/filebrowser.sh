@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 #
-username="$(cut -d: -f1 < /root/.master.info)"
+username="$(cut -d: -f1 </root/.master.info)"
 #
 if [[ -n "$1" && ! -f /install/.filebrowser.lock ]]; then
     port="$1"
-    "/home/${username}/bin/filebrowser" config set -a "127.0.0.1" -b "/filebrowser" -d "/home/${username}/.config/Filebrowser/filebrowser.db" > /dev/null 2>&1
+    "/home/${username}/bin/filebrowser" config set -a "127.0.0.1" -b "/filebrowser" -d "/home/${username}/.config/Filebrowser/filebrowser.db" >/dev/null 2>&1
 fi
 #
 if [[ -z "$1" && -f /install/.filebrowser.lock ]]; then
     systemctl stop filebrowser
     port="$("/home/${username}/bin/filebrowser" config cat -d "/home/${username}/.config/Filebrowser/filebrowser.db" | grep 'Port:' | awk '{ print $2 }')"
-    "/home/${username}/bin/filebrowser" config set -a "127.0.0.1" -b "/filebrowser" -d "/home/${username}/.config/Filebrowser/filebrowser.db" > /dev/null 2>&1
+    "/home/${username}/bin/filebrowser" config set -a "127.0.0.1" -b "/filebrowser" -d "/home/${username}/.config/Filebrowser/filebrowser.db" >/dev/null 2>&1
     systemctl start filebrowser
 fi
 #
-cat > /etc/nginx/apps/filebrowser.conf <<- NGINGCONF
+cat >/etc/nginx/apps/filebrowser.conf <<-NGINGCONF
 	location /filebrowser {
 	    proxy_pass https://127.0.0.1:${port}/filebrowser;
 	    #

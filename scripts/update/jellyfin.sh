@@ -18,7 +18,7 @@ if [[ -f /install/.jellyfin.lock ]]; then
         echo_progress_start "Removing old Jellyfin service"
         systemctl -q disable --now jellyfin.service
         rm_if_exists /etc/systemd/system/jellyfin.service
-        kill -9 $(ps xU "${username}" | grep "/opt/jellyfin/jellyfin -d /home/${username}/.config/Jellyfin$" | awk '{print $1}') > /dev/null 2>&1
+        kill -9 $(ps xU "${username}" | grep "/opt/jellyfin/jellyfin -d /home/${username}/.config/Jellyfin$" | awk '{print $1}') >/dev/null 2>&1
         rm_if_exists /opt/jellyfin
         rm_if_exists /opt/ffmpeg
         echo_progress_done "Old JF service removed"
@@ -71,8 +71,8 @@ if [[ -f /install/.jellyfin.lock ]]; then
         echo_progress_start "Moving Jellyfin to apt-managed installation"
         #
         # Add the jellyfin official repository and key to our installation so we can use apt-get to install it jellyfin and jellyfin-ffmepg.
-        curl -s https://repo.jellyfin.org/$DIST_ID/jellyfin_team.gpg.key | gpg --dearmor > /usr/share/keyrings/jellyfin-archive-keyring.gpg 2>> "${log}"
-        echo "deb [signed-by=/usr/share/keyrings/jellyfin-archive-keyring.gpg arch=$(dpkg --print-architecture)] https://repo.jellyfin.org/$DIST_ID $DIST_CODENAME main" > /etc/apt/sources.list.d/jellyfin.list
+        curl -s https://repo.jellyfin.org/$DIST_ID/jellyfin_team.gpg.key | gpg --dearmor >/usr/share/keyrings/jellyfin-archive-keyring.gpg 2>>"${log}"
+        echo "deb [signed-by=/usr/share/keyrings/jellyfin-archive-keyring.gpg arch=$(dpkg --print-architecture)] https://repo.jellyfin.org/$DIST_ID $DIST_CODENAME main" >/etc/apt/sources.list.d/jellyfin.list
         #
         # install jellyfin and jellyfin-ffmepg using apt functions.
         apt_update #forces apt refresh

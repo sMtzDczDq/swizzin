@@ -9,7 +9,7 @@ fi
 rm -rf /opt/Sonarr
 if [[ -f /install/.nginx.lock ]]; then
     rm /etc/nginx/apps/sonarr.conf
-    systemctl reload nginx >> "$log" 2>&1
+    systemctl reload nginx >>"$log" 2>&1
 fi
 
 #Mark mono depends as automatically installed
@@ -38,10 +38,10 @@ LIST='mono-runtime
     libmono-system-xml4.0-cil
     libmono-system4.0-cil'
 
-apt-mark auto ${LIST} >> ${log} 2>&1
+apt-mark auto ${LIST} >>${log} 2>&1
 
 #Remove mono if no longer required
-apt-get autoremove -y >> ${log} 2>&1
+apt-get autoremove -y >>${log} 2>&1
 rm -f /etc/apt/sources.list.d/mono-xamarin.list*
 rm -f /etc/systemd/system/sonarr.service
 

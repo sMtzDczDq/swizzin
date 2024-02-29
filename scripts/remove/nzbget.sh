@@ -1,6 +1,6 @@
 #!/bin/bash
 
-users=($(cut -d: -f1 < /etc/htpasswd))
+users=($(cut -d: -f1 </etc/htpasswd))
 
 for u in "${users[@]}"; do
     systemctl stop -q nzbget@$u

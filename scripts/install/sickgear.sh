@@ -2,7 +2,7 @@
 # Sick Gear Installer for swizzin
 # Author: liara
 
-user=$(cut -d: -f1 < /root/.master.info)
+user=$(cut -d: -f1 </root/.master.info)
 codename=$(lsb_release -cs)
 #shellcheck source=sources/functions/utils
 . /etc/swizzin/sources/functions/utils
@@ -22,7 +22,7 @@ if [[ -n $active ]]; then
     fi
     if [[ $disable == "yes" ]]; then
         echo_progress_start "Disabling service"
-        systemctl disable -q --now ${active} >> ${log} 2>&1
+        systemctl disable -q --now ${active} >>${log} 2>&1
         echo_progress_done
     else
         exit 1
@@ -39,19 +39,19 @@ python3 -m venv /opt/.venv/sickgear
 echo_progress_done
 
 echo_progress_start "Installing python requirements"
-/opt/.venv/sickgear/bin/pip3 install lxml regex scandir soupsieve cheetah3 >> $log 2>&1
+/opt/.venv/sickgear/bin/pip3 install lxml regex scandir soupsieve cheetah3 >>$log 2>&1
 chown -R ${user}: /opt/.venv/sickgear
 echo_progress_done
 
 install_rar
 
 echo_progress_start "Cloning Sickgear"
-git clone https://github.com/SickGear/SickGear.git /opt/sickgear >> ${log} 2>&1
+git clone https://github.com/SickGear/SickGear.git /opt/sickgear >>${log} 2>&1
 chown -R $user:$user /opt/sickgear
 echo_progress_done
 
 echo_progress_start "Installing systemd service"
-cat > /etc/systemd/system/sickgear.service << SRS
+cat >/etc/systemd/system/sickgear.service <<SRS
 [Unit]
 Description=SickGear
 After=syslog.target network.target

@@ -19,7 +19,7 @@ _sonarrold_flow() {
     if [[ -f /install/.sonarrold.lock ]]; then
         v2present=true
     fi
-    if dpkg -l | grep nzbdrone > /dev/null 2>&1; then
+    if dpkg -l | grep nzbdrone >/dev/null 2>&1; then
         v2present=true
     fi
 
@@ -121,11 +121,11 @@ _install_sonarr() {
     chown -R "$sonarrv3owner":"$sonarrv3owner" /home/"$sonarrv3owner"/.config
 
     echo_log_only "Setting sonarr v3 owner to $sonarrv3owner"
-    wget -O /tmp/sonarr.tar.gz "https://services.sonarr.tv/v1/download/main/latest?version=3&os=linux" >> ${log} 2>&1 || {
+    wget -O /tmp/sonarr.tar.gz "https://services.sonarr.tv/v1/download/main/latest?version=3&os=linux" >>${log} 2>&1 || {
         echo_error "Sonarr could not be downloaded from sonarr.tv. Exiting"
         exit 1
     }
-    tar xf /tmp/sonarr.tar.gz -C /opt >> ${log} 2>&1 || {
+    tar xf /tmp/sonarr.tar.gz -C /opt >>${log} 2>&1 || {
         echo_error "Failed to extract archive"
         exit 1
     }
@@ -161,7 +161,7 @@ _install_sonarr() {
 
     apt_install ${LIST}
 
-    cat > /etc/systemd/system/sonarr.service << EOSD
+    cat >/etc/systemd/system/sonarr.service <<EOSD
 [Unit]
 Description=Sonarr Daemon
 After=network.target
@@ -182,7 +182,7 @@ WantedBy=multi-user.target
 EOSD
 
     if [[ ! -f ${sonarrv3confdir}/config.xml ]]; then
-        cat > ${sonarrv3confdir}/config.xml << EOSC
+        cat >${sonarrv3confdir}/config.xml <<EOSC
 <Config>
   <LogLevel>info</LogLevel>
   <EnableSsl>False</EnableSsl>
@@ -197,7 +197,7 @@ EOSD
 EOSC
         chown -R ${sonarrv3owner}: ${sonarrv3confdir}/config.xml
     fi
-    systemctl enable --now sonarr >> ${log} 2>&1
+    systemctl enable --now sonarr >>${log} 2>&1
 
     touch /install/.sonarr.lock
 }
@@ -223,7 +223,7 @@ _nginx_sonarr() {
         #TODO what is this sleep here for? See if this can be fixed by doing a check for whatever it needs to
         echo_progress_start "Installing nginx configuration"
         bash /usr/local/bin/swizzin/nginx/sonarr.sh
-        systemctl reload nginx >> "$log" 2>&1
+        systemctl reload nginx >>"$log" 2>&1
         echo_progress_done
     else
         echo_info "Sonarr will run on port 8989"

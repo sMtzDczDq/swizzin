@@ -17,7 +17,7 @@ if [[ -f /install/.sonarr.lock ]]; then
     fi
 fi
 
-if dpkg -l | grep nzbdrone > /dev/null 2>&1; then
+if dpkg -l | grep nzbdrone >/dev/null 2>&1; then
     v2present=true
     echo_warn "Sonarr v2 is obsolete and end-of-life. Please upgrade your Sonarr to v3 using \`box upgrade sonarr\`."
 fi
@@ -41,7 +41,7 @@ if [[ -f /install/.sonarrv3.lock ]]; then
     rm /install/.sonarrv3.lock
     touch /install/.sonarr.lock
 fi
-if [[ -f /install/.sonarr.lock ]] && dpkg -l | grep sonarr | grep ^ii > /dev/null 2>&1; then
+if [[ -f /install/.sonarr.lock ]] && dpkg -l | grep sonarr | grep ^ii >/dev/null 2>&1; then
     echo_info "Migrating Sonarr away from apt management!"
     echo_progress_start "Migrating Sonarr away from apt management"
     isActive=$(systemctl is-active sonarr)
@@ -109,7 +109,7 @@ if [[ -f /install/.sonarr.lock ]] && dpkg -l | grep sonarr | grep ^ii > /dev/nul
 
     #Update broken symlink to old service
     if [[ $isEnabled == "enabled" ]]; then
-        systemctl enable sonarr >> ${log} 2>&1
+        systemctl enable sonarr >>${log} 2>&1
     fi
     echo_progress_done
 fi

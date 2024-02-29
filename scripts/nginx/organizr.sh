@@ -20,7 +20,7 @@ fi
 phpv=$(php_service_version)
 sock="php${phpv}-fpm"
 
-cat > /etc/nginx/apps/organizr.conf << ORGNGINX
+cat >/etc/nginx/apps/organizr.conf <<ORGNGINX
 location /organizr {
   root /srv;
   index index.php;

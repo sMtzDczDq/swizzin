@@ -12,7 +12,7 @@
 function _string() { perl -le 'print map {(a..z,A..Z,0..9)[rand 62] } 0..pop' 15; }
 
 function _rconf() {
-    cat > /home/${user}/.rtorrent.rc << EOF
+    cat >/home/${user}/.rtorrent.rc <<EOF
 # -- START HERE --
 directory.default.set = /home/${user}/torrents/rtorrent
 encoding.add = UTF-8
@@ -48,16 +48,16 @@ EOF
 }
 
 function _makedirs() {
-    mkdir -p /home/${user}/torrents/rtorrent 2>> $log
+    mkdir -p /home/${user}/torrents/rtorrent 2>>$log
     mkdir -p /home/${user}/.sessions
     mkdir -p /home/${user}/rwatch
-    chown -R ${user}:${user} /home/${user}/{torrents,.sessions,rwatch} 2>> $log
-    usermod -a -G www-data ${user} 2>> $log
-    usermod -a -G ${user} www-data 2>> $log
+    chown -R ${user}:${user} /home/${user}/{torrents,.sessions,rwatch} 2>>$log
+    usermod -a -G www-data ${user} 2>>$log
+    usermod -a -G ${user} www-data 2>>$log
 }
 
 _systemd() {
-    cat > /etc/systemd/system/rtorrent@.service << EOF
+    cat >/etc/systemd/system/rtorrent@.service <<EOF
 [Unit]
 Description=rTorrent
 After=network.target
@@ -74,7 +74,7 @@ WorkingDirectory=/home/%i/
 [Install]
 WantedBy=multi-user.target
 EOF
-    systemctl enable -q --now rtorrent@${user} 2>> $log
+    systemctl enable -q --now rtorrent@${user} 2>>$log
 }
 
 export DEBIAN_FRONTEND=noninteractive
@@ -82,7 +82,7 @@ export DEBIAN_FRONTEND=noninteractive
 . /etc/swizzin/sources/functions/rtorrent
 . /etc/swizzin/sources/functions/curl
 noexec=$(grep "/tmp" /etc/fstab | grep noexec)
-user=$(cut -d: -f1 < /root/.master.info)
+user=$(cut -d: -f1 </root/.master.info)
 rutorrent="/srv/rutorrent/"
 port=$((RANDOM % 64025 + 1024))
 portend=$((${port} + 1500))

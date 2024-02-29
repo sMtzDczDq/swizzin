@@ -2,7 +2,7 @@
 # Jackett updater script
 
 if [[ -f /install/.jackett.lock ]]; then
-    username=$(cut -d: -f1 < /root/.master.info)
+    username=$(cut -d: -f1 </root/.master.info)
     active=$(systemctl is-active jackett@$username)
 
     if grep -q "ExecStart=/usr/bin/mono" /etc/systemd/system/jackett@.service; then
@@ -16,7 +16,7 @@ if [[ -f /install/.jackett.lock ]]; then
         rm -rf /home/$username/Jackett
         cd /home/$username
         wget -q https://github.com/Jackett/Jackett/releases/download/$jackettver/Jackett.Binaries.LinuxAMDx64.tar.gz
-        tar -xvzf Jackett.Binaries.LinuxAMDx64.tar.gz > /dev/null 2>&1
+        tar -xvzf Jackett.Binaries.LinuxAMDx64.tar.gz >/dev/null 2>&1
         rm -f Jackett.Binaries.LinuxAMDx64.tar.gz
         chown ${username}:${username} -R Jackett
         if [[ $active == "active" ]]; then
@@ -27,7 +27,7 @@ if [[ -f /install/.jackett.lock ]]; then
     fi
 
     if ! grep -q "jackett_launcher" /etc/systemd/system/jackett@.service; then
-        cat > /etc/systemd/system/jackett@.service << JAK
+        cat >/etc/systemd/system/jackett@.service <<JAK
 [Unit]
 Description=jackett for %I
 After=network.target
@@ -56,7 +56,7 @@ JAK
 
     if [[ ! -f /home/${username}/Jackett/jackett_launcher.sh ]]; then
         echo_progress_start "Creating Jackett launcher script"
-        cat > /home/${username}/Jackett/jackett_launcher.sh << 'JL'
+        cat >/home/${username}/Jackett/jackett_launcher.sh <<'JL'
 #!/bin/bash
 user=$(whoami)
 

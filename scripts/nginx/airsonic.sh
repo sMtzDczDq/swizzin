@@ -4,7 +4,7 @@
 # Copyright (C) 2020 Swizzin
 # Licensed under GNU General Public License v3.0 GPL-3 (in short)
 
-cat > /etc/nginx/apps/airsonic.conf << NGINXCONF
+cat >/etc/nginx/apps/airsonic.conf <<NGINXCONF
 location /airsonic {
 	proxy_set_header X-Real-IP         \$remote_addr;
 	proxy_set_header X-Forwarded-For   \$proxy_add_x_forwarded_for;

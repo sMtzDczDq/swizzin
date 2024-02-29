@@ -34,17 +34,17 @@ function _get_user_list() {
     output=""
     for file in $(find /root/ -maxdepth 1 -name '*.info' ! -name .master.info | sort); do
         if [[ -f $file ]]; then
-            output+="$(cut -d: -f1 < "$file")\n"
+            output+="$(cut -d: -f1 <"$file")\n"
         fi
     done
-    output+=$(cut -d: -f1 < /root/.master.info)
+    output+=$(cut -d: -f1 </root/.master.info)
     echo -e "$output" | sort | uniq
 }
 export -f _get_user_list
 
 #Returns the username of the master
 function _get_master_username() {
-    cut -d: -f1 < /root/.master.info
+    cut -d: -f1 </root/.master.info
 }
 export -f _get_master_username
 
@@ -113,8 +113,8 @@ function password_check() {
     ##Cracklib test
     if [ "$SKIPCRACKLIB" != "true" ]; then
         echo_progress_start "Checking password strength"
-        result=$(cracklib-check <<< "$pass")
-        if ! grep -q OK <<< "$result"; then
+        result=$(cracklib-check <<<"$pass")
+        if ! grep -q OK <<<"$result"; then
             crackreason=$(echo "$result" | cut -d':' -f2)
             if [[ $ui = "whiptail" ]]; then
                 whiptail --title "Error" --msgbox "Password did not pass cracklib check.\nReason: \"${crackreason/ /}\"" --ok-button="Try again" 10 50

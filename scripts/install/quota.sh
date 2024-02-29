@@ -49,9 +49,9 @@ echo -e "${bold}${yellow}2)${normal} /home - ${green}home mount${normal}"
 echo -ne "${bold}${yellow}What is your mount point for user quotas?${normal} (Default ${green}1${normal}): "
 read version
 case $version in
-    1 | "") primaryroot=root ;;
-    2) primaryroot=home ;;
-    *) primaryroot=root ;;
+1 | "") primaryroot=root ;;
+2) primaryroot=home ;;
+*) primaryroot=root ;;
 esac
 echo "Using ${green}$primaryroot mount${normal} for quotas"
 echo
@@ -91,17 +91,17 @@ function _installquota() {
     if [[ $DISTRO == Ubuntu ]]; then
         sed -ie '/\'"${loc}"'/ s/'${hook}'/'${hook}',usrjquota=aquota.user,jqfmt=vfsv1/' /etc/fstab
         apt_install linux-image-extra-virtual quota
-        mount -o remount ${loc} >> "${log}" 2>&1
-        quotacheck -auMF vfsv1 >> "${log}" 2>&1
-        quotaon -uv / >> "${log}" 2>&1
-        systemctl start quota >> "${log}" 2>&1
+        mount -o remount ${loc} >>"${log}" 2>&1
+        quotacheck -auMF vfsv1 >>"${log}" 2>&1
+        quotaon -uv / >>"${log}" 2>&1
+        systemctl start quota >>"${log}" 2>&1
     elif [[ $DISTRO == Debian ]]; then
         sed -ie '/\'"${loc}"'/ s/'${hook}'/'${hook}',usrjquota=aquota.user,jqfmt=vfsv1/' /etc/fstab
         apt_install quota
-        mount -o remount ${loc} >> "${log}" 2>&1
-        quotacheck -auMF vfsv1 >> "${log}" 2>&1
-        quotaon -uv / >> "${log}" 2>&1
-        systemctl start quota >> "${log}" 2>&1
+        mount -o remount ${loc} >>"${log}" 2>&1
+        quotacheck -auMF vfsv1 >>"${log}" 2>&1
+        quotaon -uv / >>"${log}" 2>&1
+        systemctl start quota >>"${log}" 2>&1
     fi
 
     if [[ -d /srv/rutorrent ]]; then
@@ -115,7 +115,7 @@ DISTRO=$(lsb_release -is)
 
 _installquota
 
-cat > /etc/sudoers.d/quota << EOSUD
+cat >/etc/sudoers.d/quota <<EOSUD
 #Defaults  env_keep -="HOME"
 Defaults:www-data !logfile
 Defaults:www-data !syslog
@@ -127,6 +127,6 @@ www-data     ALL = (ALL) NOPASSWD: QUOTA
 EOSUD
 
 touch /install/.quota.lock
-echo "${primaryroot}" > /install/.quota.lock
+echo "${primaryroot}" >/install/.quota.lock
 
 echo "Quotas have been installed. Use the command setdisk to set quotas per user."

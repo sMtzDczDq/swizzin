@@ -22,7 +22,7 @@ function _remove_autobrr() {
         rm -f /etc/nginx/apps/autobrr.conf
         rm -f /etc/nginx/conf.d/*.autobrr.conf
 
-        systemctl reload nginx >> "$log" 2>&1
+        systemctl reload nginx >>"$log" 2>&1
     fi
 
     rm /install/.autobrr.lock

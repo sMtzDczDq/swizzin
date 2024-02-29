@@ -21,12 +21,12 @@ fi
 username=$(_get_master_username)
 
 case $(os_codename) in
-    bullseye)
-        java=openjdk-17-jdk-headless
-        ;;
-    *)
-        java=default-jre-headless
-        ;;
+bullseye)
+    java=openjdk-17-jdk-headless
+    ;;
+*)
+    java=default-jre-headless
+    ;;
 esac
 LIST='unzip $java'
 apt_install $LIST
@@ -37,8 +37,8 @@ latestversion=$(echo $latest | grep -oP 'v\d+\.\d+\.\d+')
 cd /opt
 mkdir nzbhydra2
 cd nzbhydra2
-wget -O nzbhydra2.zip ${latest} >> ${log} 2>&1
-unzip nzbhydra2.zip >> ${log} 2>&1
+wget -O nzbhydra2.zip ${latest} >>${log} 2>&1
+unzip nzbhydra2.zip >>${log} 2>&1
 rm -f nzbhydra2.zip
 
 chmod +x nzbhydra2
@@ -57,7 +57,7 @@ chown ${username}: /home/${username}/.config
 chown ${username}: /home/${username}/.config/nzbhydra2
 
 echo_progress_start "Installing systemd service"
-cat > /etc/systemd/system/nzbhydra.service << EOH2
+cat >/etc/systemd/system/nzbhydra.service <<EOH2
 [Unit]
 Description=NZBHydra2 Daemon
 Documentation=https://github.com/theotherp/nzbhydra2

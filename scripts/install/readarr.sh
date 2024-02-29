@@ -45,23 +45,23 @@ _install() {
 
     urlbase="https://$app_name.servarr.com/v1/update/$app_branch/updatefile?os=linux&runtime=netcore"
     case "$(_os_arch)" in
-        "amd64") dlurl="${urlbase}&arch=x64" ;;
-        "armhf") dlurl="${urlbase}&arch=arm" ;;
-        "arm64") dlurl="${urlbase}&arch=arm64" ;;
-        *)
-            echo_error "Arch not supported"
-            exit 1
-            ;;
+    "amd64") dlurl="${urlbase}&arch=x64" ;;
+    "armhf") dlurl="${urlbase}&arch=arm" ;;
+    "arm64") dlurl="${urlbase}&arch=arm64" ;;
+    *)
+        echo_error "Arch not supported"
+        exit 1
+        ;;
     esac
 
-    if ! curl "$dlurl" -L -o "/tmp/$app_name.tar.gz" >> "$log" 2>&1; then
+    if ! curl "$dlurl" -L -o "/tmp/$app_name.tar.gz" >>"$log" 2>&1; then
         echo_error "Download failed, exiting"
         exit 1
     fi
     echo_progress_done "Archive downloaded"
 
     echo_progress_start "Extracting archive"
-    tar xfv "/tmp/$app_name.tar.gz" --directory /opt/ >> "$log" 2>&1 || {
+    tar xfv "/tmp/$app_name.tar.gz" --directory /opt/ >>"$log" 2>&1 || {
         echo_error "Failed to extract"
         exit 1
     }
@@ -84,7 +84,7 @@ _nginx() {
 _systemd() {
 
     echo_progress_start "Installing Systemd service"
-    cat > "/etc/systemd/system/$app_servicefile" << EOF
+    cat >"/etc/systemd/system/$app_servicefile" <<EOF
 [Unit]
 Description=${app_name^} Daemon
 After=syslog.target network.target

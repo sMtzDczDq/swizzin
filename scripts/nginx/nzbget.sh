@@ -2,10 +2,10 @@
 # Nginx Configurator for nzbget
 # Author: liara
 
-users=($(cut -d: -f1 < /etc/htpasswd))
+users=($(cut -d: -f1 </etc/htpasswd))
 
 if [[ ! -f /etc/nginx/apps/nzbget.conf ]]; then
-    cat > /etc/nginx/apps/nzbget.conf << 'NRP'
+    cat >/etc/nginx/apps/nzbget.conf <<'NRP'
 location /nzbget {
   return 301 /nzbget/;
 }
@@ -29,7 +29,7 @@ for u in "${users[@]}"; do
 
     if [[ ! -f /etc/nginx/conf.d/${u}.nzbget.conf ]]; then
         NZBPORT=$(grep ControlPort /home/$u/nzbget/nzbget.conf | cut -d= -f2)
-        cat > /etc/nginx/conf.d/${u}.nzbget.conf << NZBUPS
+        cat >/etc/nginx/conf.d/${u}.nzbget.conf <<NZBUPS
 upstream $u.nzbget {
   server 127.0.0.1:$NZBPORT;
 }

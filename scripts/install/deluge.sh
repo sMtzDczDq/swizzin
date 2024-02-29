@@ -38,25 +38,25 @@ fi
 whiptail_deluge
 
 case $DELUGE_VERSION in
-    [Rr][Ee][Pp][Oo])
-        apt_install_deluge
-        ;;
-    *)
-        detect_libtorrent_rasterbar_conflict deluge
-        deluge_version_info
-        install_fpm
+[Rr][Ee][Pp][Oo])
+    apt_install_deluge
+    ;;
+*)
+    detect_libtorrent_rasterbar_conflict deluge
+    deluge_version_info
+    install_fpm
 
-        if ! skip_libtorrent_deluge; then
-            check_swap_on
-            echo_progress_start "Building libtorrent-rasterbar"
-            build_libtorrent_deluge
-            echo_progress_done "Libtorrent-rasterbar installed"
-            check_swap_off
-        fi
+    if ! skip_libtorrent_deluge; then
+        check_swap_on
+        echo_progress_start "Building libtorrent-rasterbar"
+        build_libtorrent_deluge
+        echo_progress_done "Libtorrent-rasterbar installed"
+        check_swap_off
+    fi
 
-        build_deluge
-        cleanup_repo_libtorrent
-        ;;
+    build_deluge
+    cleanup_repo_libtorrent
+    ;;
 esac
 _dconf
 _dservice

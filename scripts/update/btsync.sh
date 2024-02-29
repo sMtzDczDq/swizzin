@@ -6,9 +6,9 @@ if [[ -f /install/.btsync.lock ]]; then
         if [[ $active == "active" ]]; then
             systemctl stop resilo-sync
         fi
-        MASTER=$(cut -d: -f1 < /root/.master.info)
+        MASTER=$(cut -d: -f1 </root/.master.info)
         BTSYNCIP=$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')
-        cat > /etc/resilio-sync/config.json << RSCONF
+        cat >/etc/resilio-sync/config.json <<RSCONF
 {
     "listening_port" : 0,
     "storage_path" : "/home/${MASTER}/.config/resilio-sync/",
@@ -30,7 +30,7 @@ RSCONF
         fi
         echo_progress_done
     fi
-    if grep -q EULA /etc/resilio-sync/config.json > /dev/null 2>&1; then
+    if grep -q EULA /etc/resilio-sync/config.json >/dev/null 2>&1; then
         isActive=$(systemctl is-active resilio-sync)
         if [[ $isActive == "active" ]]; then
             systemctl stop resilio-sync

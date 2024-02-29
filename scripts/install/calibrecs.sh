@@ -46,7 +46,7 @@ _adduser() {
 }
 
 _systemd() {
-    cat > /etc/systemd/system/calibrecs.service << CALICS
+    cat >/etc/systemd/system/calibrecs.service <<CALICS
 [Unit]
 Description=calibre content server
 After=network.target
