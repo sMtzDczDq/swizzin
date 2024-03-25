@@ -5,7 +5,7 @@ function detect_libtorrent_rasterbar_conflict() {
     repo_libtorrents=(libtorrent-rasterbar7 libtorrent-rasterbar8 libtorrent-rasterbar9 libtorrent-rasterbar10 libtorrent-rasterbar-dev)
     conflicting_libtorrent_packages=()
     for lib in "${repo_libtorrents[@]}"; do
-        if dpkg -s $lib >/dev/null 2>&1; then
+        if dpkg -s $lib > /dev/null 2>&1; then
             repolibtorrent=true
         fi
     done
@@ -14,7 +14,7 @@ function detect_libtorrent_rasterbar_conflict() {
             libtorrent_libnames=(python3-libtorrent python-libtorrent)
             for lib in "${libtorrent_libnames[@]}"; do
                 #If these are not "swizzin" packages they must be repo, so avoid triggering the staticconflict
-                if dpkg -s $lib >/dev/null 2>&1 && ! dpkg -s $lib 2>/dev/null | grep swizzin >/dev/null 2>&1; then
+                if dpkg -s $lib > /dev/null 2>&1 && ! dpkg -s $lib 2> /dev/null | grep swizzin > /dev/null 2>&1; then
                     libtorrent_libnames=("${libtorrent_libnames[@]/$lib/}")
                 fi
             done
@@ -24,7 +24,7 @@ function detect_libtorrent_rasterbar_conflict() {
     fi
     if [[ -n $libtorrent_libnames ]]; then
         for lib in "${libtorrent_libnames[@]}"; do
-            if dpkg -s $lib >/dev/null 2>&1 && ! dpkg -s $lib | grep static >/dev/null 2>&1; then
+            if dpkg -s $lib > /dev/null 2>&1 && ! dpkg -s $lib | grep static > /dev/null 2>&1; then
                 staticconflict=true
                 conflicting_libtorrent_packages+=($lib)
             fi
@@ -52,16 +52,16 @@ function libtorrent_resolve_shared_conflict() {
     if [[ -f /install/.deluge.lock ]] && [[ -z ${DELUGE_VERSION} ]]; then
         deluge_version=$(deluged -v | grep deluged | grep -oP '\d+\.\d+\.\d+')
         case $deluge_version in
-        1.3.*)
-            DELUGE_VERSION=1.3-stable
-            ;;
-        *)
-            DELUGE_VERSION=master
-            ;;
+            1.3.*)
+                DELUGE_VERSION=1.3-stable
+                ;;
+            *)
+                DELUGE_VERSION=master
+                ;;
         esac
     fi
     if [[ -f /install/.qbittorrent.lock ]] && [[ -z ${QBITTORRENT_VERSION} ]]; then
-        QBITTORRENT_VERSION=$(qbittorrent-nox --version 2>/dev/null | grep -oP '\d+\.\d+\.\d+')
+        QBITTORRENT_VERSION=$(qbittorrent-nox --version 2> /dev/null | grep -oP '\d+\.\d+\.\d+')
     fi
     apt_remove "${conflicting_libtorrent_packages[@]}"
     if [[ -n $DELUGE_VERSION && ! ${called_by} == deluge && "${conflicting_libtorrent_packages[*]}" =~ python ]]; then
@@ -93,7 +93,7 @@ function libtorrent_resolve_shared_conflict() {
 
 function check_shared_libtorrent_rasterbar() {
     called_by=$1
-    if dpkg -l | grep libtorrent-rasterbar | grep -v static | grep swizzin >/dev/null 2>&1; then
+    if dpkg -l | grep libtorrent-rasterbar | grep -v static | grep swizzin > /dev/null 2>&1; then
         echo_info "Found conflicting $a. Removing."
         if [[ $called_by == "deluge" && -f /install/.qbittorrent.lock ]]; then
             echo_warn "qBittorrent may not function as expected if you have not yet upgraded it to a static build or converted it to \"repo\". You should run \`box upgrade qbittorent\` after this."
@@ -101,9 +101,9 @@ function check_shared_libtorrent_rasterbar() {
         if [[ $called_by == "qbittorrent" && -f /install/.deluge.lock ]]; then
             echo_warn "Deluge may not function as expected if you have not yet upgraded it to a static build or converted it to \"repo\". You should run \`box upgrade deluge\` after this."
         fi
-        dpkg -r libtorrent-rasterbar >/dev/null 2>&1
-    elif dpkg -l | grep libtorrent-rasterbar | grep static | grep swizzin >/dev/null 2>&1 && [[ $called_by == "qbittorrent" ]]; then
-        dpkg -r libtorrent-rasterbar >/dev/null 2>&1
+        dpkg -r libtorrent-rasterbar > /dev/null 2>&1
+    elif dpkg -l | grep libtorrent-rasterbar | grep static | grep swizzin > /dev/null 2>&1 && [[ $called_by == "qbittorrent" ]]; then
+        dpkg -r libtorrent-rasterbar > /dev/null 2>&1
     fi
 }
 
@@ -121,21 +121,21 @@ function cleanup_repo_libtorrent() {
         for lib in "${libtorrent_libnames[@]}"; do
             #If these are not "swizzin" packages they must be repo, so just remove them and get on with it
             #Since deluge called the conflict function which only triggers when compiled, we can assume these packages are no longer required no matter what
-            if dpkg -s $lib >/dev/null 2>&1 && ! dpkg -s $lib 2>/dev/null | grep swizzin >/dev/null 2>&1; then
-                dpkg -r ${lib} >/dev/null 2>&1
+            if dpkg -s $lib > /dev/null 2>&1 && ! dpkg -s $lib 2> /dev/null | grep swizzin > /dev/null 2>&1; then
+                dpkg -r ${lib} > /dev/null 2>&1
             fi
         done
     fi
     #Clean up traces of repo libtorrents if no further repo clients are installed
     #repo_libtorrents is defined in detect_libtorrent_rasterbar_conflict()
-    if [[ -n $DELUGE_VERSION && ! $DELUGE_VERSION == "repo" ]] && dpkg -s qbittorrent-nox 2>/dev/null | grep swizzin | grep static >/dev/null 2>&1; then
+    if [[ -n $DELUGE_VERSION && ! $DELUGE_VERSION == "repo" ]] && dpkg -s qbittorrent-nox 2> /dev/null | grep swizzin | grep static > /dev/null 2>&1; then
         for package in ${repo_libtorrents[@]}; do
-            dpkg -r $package >/dev/null 2>&1
+            dpkg -r $package > /dev/null 2>&1
         done
     fi
-    if [[ -n $QBITTORRENT_VERSION && ! $QBITTORRENT_VERSION == "repo" ]] && (dpkg -s python-libtorrent 2>/dev/null | grep swizzin >/dev/null 2>&1 || dpkg -s python3-libtorrent 2>/dev/null | grep swizzin >/dev/null 2>&1); then
+    if [[ -n $QBITTORRENT_VERSION && ! $QBITTORRENT_VERSION == "repo" ]] && (dpkg -s python-libtorrent 2> /dev/null | grep swizzin > /dev/null 2>&1 || dpkg -s python3-libtorrent 2> /dev/null | grep swizzin > /dev/null 2>&1); then
         for package in ${repo_libtorrents[@]}; do
-            dpkg -r $package >/dev/null 2>&1
+            dpkg -r $package > /dev/null 2>&1
         done
     fi
 }
@@ -148,17 +148,45 @@ function booststrap() {
     if [[ ! -d ${BOOST_ROOT} ]]; then
         echo_progress_start "Installing boost"
         cd /opt
-        wget https://boostorg.jfrog.io/artifactory/main/release/${BOOST_VERSION//_/.}/source/boost_${BOOST_VERSION}.tar.gz >>${log} 2>&1 || {
-            echo_warn "Could not download boost from main mirror, attempting fallback."
-            wget https://deac-ams.dl.sourceforge.net/project/boost/boost/${BOOST_VERSION//_/.}/boost_${BOOST_VERSION}.tar.gz >>${log} 2>&1 || {
-                echo_error "Boost could not be downloaded. Setup will exit."
-                exit 1
-            }
-        }
-        tar xvf boost_${BOOST_VERSION}.tar.gz >>${log} 2>&1
+        declare -A boost_mirror_urls=(
+            ["jfrog.io"]="https://boostorg.jfrog.io/artifactory/main/release/${BOOST_VERSION//_/.}/source/boost_${BOOST_VERSION}.tar.gz"
+            ["boost.io"]="https://archives.boost.io/release/${BOOST_VERSION//_/.}/source/boost_${BOOST_VERSION}.tar.gz"
+            ["sourceforge"]="https://deac-ams.dl.sourceforge.net/project/boost/boost/${BOOST_VERSION//_/.}/boost_${BOOST_VERSION}.tar.gz"
+        )
+
+        boost_failed_downloads=0
+        boost_valid_mime_types=("application/octet-stream" "application/x-gzip")
+
+        for boost_mirror in "${!boost_mirror_urls[@]}"; do
+            boost_url="${boost_mirror_urls[${boost_mirror}]}"
+
+            boost_response=$(wget --spider -S --max-redirect=2 --server-response "${boost_url}" 2>&1)
+            boost_content_type=$(echo "${boost_response}" | awk '/Content-Type/ {print $2}')
+
+            if [[ " ${boost_valid_mime_types[*]} " == *" ${boost_content_type} "* ]]; then
+                echo "Downloading from ${boost_mirror}: ${boost_url}..." >> ${log} 2>&1
+                wget --max-redirect=2 "${boost_url}" >> ${log} 2>&1
+                if [ $? -eq 0 ]; then
+                    echo_info "Download from ${boost_mirror} successful, extracting files."
+                    break
+                else
+                    echo_info "Download from ${boost_mirror}. Trying next mirror..." >> ${log}
+                    ((boost_failed_downloads++))
+                fi
+            else
+                echo_info "Skipping mirror ${boost_mirror}. Not a gzip file or offline" >> ${log} 2>&1
+                ((boost_failed_downloads++))
+            fi
+        done
+
+        if [ "${boost_failed_downloads}" -eq "${#boost_mirror_urls[@]}" ]; then
+            echo_error "No download mirror available."
+            exit 1
+        fi
+        tar xvf boost_${BOOST_VERSION}.tar.gz >> ${log} 2>&1
         rm -f boost_${BOOST_VERSION}.tar.gz
         cd ${BOOST_ROOT}
-        /opt/boost_${BOOST_VERSION}/bootstrap.sh --with-libraries=system >>${log} 2>&1
+        /opt/boost_${BOOST_VERSION}/bootstrap.sh --with-libraries=system >> ${log} 2>&1
         echo_progress_done "Boost installed!"
     fi
 }
@@ -167,24 +195,24 @@ function libtorrent_clone() {
     libtorrent_github_tags_list=$(git ls-remote -q -t --refs https://github.com/arvidn/libtorrent.git | awk '/\/v/{sub("refs/tags/", "");sub("(.*)(-[^0-9].*)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV)
 
     case $libtorrent_branch in
-    RC_1_1)
-        libtorrent_github_tag=RC_1_1
-        ;;
-    RC_1_2)
-        tag_libtorrent_version=1.2
-        ;;
-    RC_2_0)
-        tag_libtorrent_version=2.0
-        ;;
-    *)
-        tag_libtorrent_version=1.2
-        ;;
+        RC_1_1)
+            libtorrent_github_tag=RC_1_1
+            ;;
+        RC_1_2)
+            tag_libtorrent_version=1.2
+            ;;
+        RC_2_0)
+            tag_libtorrent_version=2.0
+            ;;
+        *)
+            tag_libtorrent_version=1.2
+            ;;
     esac
 
-    libtorrent_github_tag_default="$(grep -Eom1 "v${tag_libtorrent_version}.([0-9]{1,2})" <<<"${libtorrent_github_tags_list}")"
+    libtorrent_github_tag_default="$(grep -Eom1 "v${tag_libtorrent_version}.([0-9]{1,2})" <<< "${libtorrent_github_tags_list}")"
     libtorrent_github_tag="${libtorrent_github_tag:-$libtorrent_github_tag_default}"
 
-    git clone --no-tags --single-branch --branch "${libtorrent_github_tag}" --shallow-submodules --recurse-submodules -j"$(nproc)" --depth 1 "https://github.com/arvidn/libtorrent.git" "/tmp/libtorrent" >>${log} 2>&1 || {
+    git clone --no-tags --single-branch --branch "${libtorrent_github_tag}" --shallow-submodules --recurse-submodules -j"$(nproc)" --depth 1 "https://github.com/arvidn/libtorrent.git" "/tmp/libtorrent" >> ${log} 2>&1 || {
         echo_error "Libtorrent could not be cloned from git. Setup will not proceed"
         exit 1
     }

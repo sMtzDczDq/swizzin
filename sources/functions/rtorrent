@@ -29,52 +29,52 @@ function whiptail_rtorrent() {
 
 function set_rtorrent_version() {
     case $1 in
-    0.9.6 | '0.9.6')
-        export rtorrentver='0.9.6'
-        export libtorrentver='0.13.6'
-        export libudns='false'
-        export rtorrentpgo='false'
-        ;;
+        0.9.6 | '0.9.6')
+            export rtorrentver='0.9.6'
+            export libtorrentver='0.13.6'
+            export libudns='false'
+            export rtorrentpgo='false'
+            ;;
 
-    0.9.7 | '0.9.7')
-        export rtorrentver='0.9.7'
-        export libtorrentver='0.13.7'
-        export libudns='false'
-        export rtorrentpgo='false'
-        ;;
+        0.9.7 | '0.9.7')
+            export rtorrentver='0.9.7'
+            export libtorrentver='0.13.7'
+            export libudns='false'
+            export rtorrentpgo='false'
+            ;;
 
-    0.9.8 | '0.9.8')
-        export rtorrentver='0.9.8'
-        export libtorrentver='0.13.8'
-        export libudns='false'
-        export rtorrentpgo='false'
-        ;;
+        0.9.8 | '0.9.8')
+            export rtorrentver='0.9.8'
+            export libtorrentver='0.13.8'
+            export libudns='false'
+            export rtorrentpgo='false'
+            ;;
 
-    UDNS | 'UDNS')
-        export rtorrentver='0.9.8'
-        export libtorrentver='0.13.8'
-        export libudns='true'
-        export rtorrentpgo='false'
-        ;;
+        UDNS | 'UDNS')
+            export rtorrentver='0.9.8'
+            export libtorrentver='0.13.8'
+            export libudns='true'
+            export rtorrentpgo='false'
+            ;;
 
-    PGO | 'PGO')
-        export rtorrentver='0.9.8'
-        export libtorrentver='0.13.8'
-        export libudns='true'
-        export rtorrentpgo='true'
-        ;;
+        PGO | 'PGO')
+            export rtorrentver='0.9.8'
+            export libtorrentver='0.13.8'
+            export libudns='true'
+            export rtorrentpgo='true'
+            ;;
 
-    Repo | 'Repo')
-        export rtorrentver='repo'
-        export libtorrentver='repo'
-        export libudns='false'
-        export rtorrentpgo='false'
-        ;;
+        Repo | 'Repo')
+            export rtorrentver='repo'
+            export libtorrentver='repo'
+            export libudns='false'
+            export rtorrentpgo='false'
+            ;;
 
-    *)
-        echo_error "$1 is not a valid rTorrent version"
-        exit 1
-        ;;
+        *)
+            echo_error "$1 is not a valid rTorrent version"
+            exit 1
+            ;;
     esac
 }
 
@@ -125,24 +125,24 @@ function depends_rtorrent() {
 
     # mktorrent from source
     cd /tmp
-    curl -sL https://github.com/Rudde/mktorrent/archive/v1.1.zip -o mktorrent.zip >>$log 2>&1
+    curl -sL https://github.com/Rudde/mktorrent/archive/v1.1.zip -o mktorrent.zip >> $log 2>&1
     . /etc/swizzin/sources/functions/utils
     rm_if_exists "/tmp/mktorrent"
-    unzip -d mktorrent -j mktorrent.zip >>$log 2>&1
+    unzip -d mktorrent -j mktorrent.zip >> $log 2>&1
     cd mktorrent
-    make >>$log 2>&1
-    make install PREFIX=/usr >>$log 2>&1
+    make -j$(nproc) CC=gcc CFLAGS="-w ${rtorrentflto} ${rtorrentpipe} ${rtorrentlevel}" >> $log 2>&1
+    make install PREFIX=/usr >> $log 2>&1
     cd /tmp
     rm -rf mktorrent*
 
     # libudns from source
     if [[ ${libudns} == "true" ]]; then
-        git clone -q https://github.com/shadowsocks/libudns /tmp/udns >>$log 2>&1
+        git clone -q https://github.com/shadowsocks/libudns /tmp/udns >> $log 2>&1
         cd /tmp/udns
-        ./autogen.sh >>$log 2>&1
-        ./configure --prefix=/usr >>$log 2>&1
-        make -j$(nproc) CFLAGS="-w ${rtorrentflto} ${rtorrentpipe} ${rtorrentlevel} -fPIC" >>$log 2>&1
-        make -s install >>$log 2>&1
+        ./autogen.sh >> $log 2>&1
+        ./configure --prefix=/usr >> $log 2>&1
+        make -j$(nproc) CFLAGS="-w ${rtorrentflto} ${rtorrentpipe} ${rtorrentlevel} -fPIC" >> $log 2>&1
+        make -s install >> $log 2>&1
         cd /tmp
         rm -rf udns*
     fi
@@ -153,24 +153,24 @@ function build_xmlrpc-c() {
     . /etc/swizzin/sources/functions/utils
     rm_if_exists "/tmp/xmlrpc-c"
     rm_if_exists "/tmp/dist/xmlrpc-c "
-    svn checkout svn://svn.code.sf.net/p/xmlrpc-c/code/super_stable /tmp/xmlrpc-c >>$log 2>&1
+    svn checkout svn://svn.code.sf.net/p/xmlrpc-c/code/stable@3212 /tmp/xmlrpc-c >> $log 2>&1
     cd /tmp/xmlrpc-c
-    cp -rf /etc/swizzin/sources/patches/rtorrent/xmlrpc-config.guess config.guess >>$log 2>&1
-    cp -rf /etc/swizzin/sources/patches/rtorrent/xmlrpc-config.sub config.sub >>$log 2>&1
-    ./configure --prefix=/usr --disable-cplusplus --disable-wininet-client --disable-libwww-client >>$log 2>&1 || {
+    cp -rf /etc/swizzin/sources/patches/rtorrent/xmlrpc-config.guess config.guess >> $log 2>&1
+    cp -rf /etc/swizzin/sources/patches/rtorrent/xmlrpc-config.sub config.sub >> $log 2>&1
+    ./configure --prefix=/usr --disable-cplusplus --disable-wininet-client --disable-libwww-client >> $log 2>&1 || {
         echo_error "Something went wrong while configuring xmlrpc"
         exit 1
     }
     source <(sed 's/ //g' version.mk)
     VERSION=$XMLRPC_MAJOR_RELEASE.$XMLRPC_MINOR_RELEASE.$XMLRPC_POINT_RELEASE
-    make -j$(nproc) CFLAGS="-w ${rtorrentflto} ${rtorrentpipe}" >>$log 2>&1
-    make DESTDIR=/tmp/dist/xmlrpc-c install >>$log 2>&1 || {
+    make -j$(nproc) CFLAGS="-w ${rtorrentlevel} ${rtorrentflto} ${rtorrentpipe}" >> $log 2>&1
+    make DESTDIR=/tmp/dist/xmlrpc-c install >> $log 2>&1 || {
         echo_error "Something went wrong while making xmlrpc"
         exit 1
     }
     mkdir -p /root/dist
-    fpm -f -C /tmp/dist/xmlrpc-c -p /root/dist/xmlrpc-c_VERSION.deb -s dir -t deb -n xmlrpc-c --version ${VERSION} --description "xmlrpc-c compiled by swizzin" >/dev/null 2>&1
-    dpkg -i /root/dist/xmlrpc-c_${VERSION}.deb >>$log 2>&1
+    fpm -f -C /tmp/dist/xmlrpc-c -p /root/dist/xmlrpc-c_VERSION.deb -s dir -t deb -n xmlrpc-c --version ${VERSION} --description "xmlrpc-c compiled by swizzin" > /dev/null 2>&1
+    dpkg -i /root/dist/xmlrpc-c_${VERSION}.deb >> $log 2>&1
     cd /tmp
     rm -rf xmlrpc-c
     rm -rf /tmp/dist/xmlrpc-c
@@ -184,11 +184,11 @@ function build_libtorrent_rakshasa() {
     mkdir /tmp/libtorrent
     curl -sL ${libtorrentloc} -o /tmp/libtorrent-${libtorrentver}.tar.gz
     VERSION=$libtorrentver
-    tar -xf /tmp/libtorrent-${libtorrentver}.tar.gz -C /tmp/libtorrent --strip-components=1 >>$log 2>&1
-    cd /tmp/libtorrent >>$log 2>&1
+    tar -xf /tmp/libtorrent-${libtorrentver}.tar.gz -C /tmp/libtorrent --strip-components=1 >> $log 2>&1
+    cd /tmp/libtorrent >> $log 2>&1
 
     if [[ -f /root/libtorrent-rakshasa-${libtorrentver}.patch ]]; then
-        patch -p1 </root/libtorrent-rakshasa-${libtorrentver}.patch >>${log} 2>&1 || {
+        patch -p1 < /root/libtorrent-rakshasa-${libtorrentver}.patch >> ${log} 2>&1 || {
             echo _error "Something went wrong when patching libtorrent-rakshasa"
             exit 1
         }
@@ -197,39 +197,37 @@ function build_libtorrent_rakshasa() {
         echo_log_only "No libtorrent-rakshasa patch found at /root/libtorrent-rakshasa-${libtorrentver}.patch"
     fi
     if [[ ${libudns} == "true" ]]; then
-        patch -p1 </etc/swizzin/sources/patches/rtorrent/libtorrent-udns-0.13.8.patch >>"$log" 2>&1
-        patch -p1 </etc/swizzin/sources/patches/rtorrent/libtorrent-scanf-0.13.8.patch >>"$log" 2>&1
-        patch -p1 </etc/swizzin/sources/patches/rtorrent/lookup-cache-0.13.8.patch >>"$log" 2>&1
+        patch -p1 < /etc/swizzin/sources/patches/rtorrent/libtorrent-udns-0.13.8.patch >> "$log" 2>&1
+        patch -p1 < /etc/swizzin/sources/patches/rtorrent/libtorrent-scanf-0.13.8.patch >> "$log" 2>&1
+        patch -p1 < /etc/swizzin/sources/patches/rtorrent/lookup-cache-0.13.8.patch >> "$log" 2>&1
     fi
-    #apply piece boundary fix to all libtorrents
-    patch -p1 </etc/swizzin/sources/patches/rtorrent/piece-boundary-fix-0.13.8.patch >>"$log" 2>&1
     if [[ ${libtorrentver} =~ ^("0.13.7"|"0.13.8")$ ]]; then
-        patch -p1 </etc/swizzin/sources/patches/rtorrent/throttle-fix-0.13.7-8.patch >>"$log" 2>&1
+        patch -p1 < /etc/swizzin/sources/patches/rtorrent/throttle-fix-0.13.7-8.patch >> "$log" 2>&1
     fi
     if [[ ${libtorrentver} =~ ^("0.13.6"|"0.13.7")$ ]]; then
-        patch -p1 </etc/swizzin/sources/patches/rtorrent/openssl.patch >>"$log" 2>&1
+        patch -p1 < /etc/swizzin/sources/patches/rtorrent/openssl.patch >> "$log" 2>&1
         if pkg-config --atleast-version=1.14 cppunit && [[ ${libtorrentver} == 0.13.6 ]]; then
-            patch -p1 </etc/swizzin/sources/patches/rtorrent/cppunit-libtorrent.patch >>"$log" 2>&1
+            patch -p1 < /etc/swizzin/sources/patches/rtorrent/cppunit-libtorrent.patch >> "$log" 2>&1
         fi
         if [[ ${libtorrentver} == "0.13.6" ]]; then
-            patch -p1 </etc/swizzin/sources/patches/rtorrent/bencode-libtorrent.patch >>"$log" 2>&1
-            patch -p1 </etc/swizzin/sources/patches/rtorrent/throttle-fix-0.13.6.patch >>"$log" 2>&1
+            patch -p1 < /etc/swizzin/sources/patches/rtorrent/bencode-libtorrent.patch >> "$log" 2>&1
+            patch -p1 < /etc/swizzin/sources/patches/rtorrent/throttle-fix-0.13.6.patch >> "$log" 2>&1
         fi
     fi
-    ./autogen.sh >>$log 2>&1
-    ./configure --prefix=/usr >>$log 2>&1 || {
+    ./autogen.sh >> $log 2>&1
+    ./configure --prefix=/usr --enable-aligned >> $log 2>&1 || {
         echo_error "Something went wrong while configuring libtorrent"
         exit 1
     }
-    make -j$(nproc) CXXFLAGS="-w ${rtorrentlevel} ${rtorrentflto} ${rtorrentpipe}" >>$log 2>&1 || {
+    make -j$(nproc) CXXFLAGS="-w ${rtorrentlevel} ${rtorrentflto} ${rtorrentpipe}" >> $log 2>&1 || {
         echo_error "Something went wrong while making libtorrent"
         exit 1
     }
     rm_if_exists "/tmp/dist/libtorrent-rakshasa"
-    make DESTDIR=/tmp/dist/libtorrent-rakshasa install >>$log 2>&1
+    make DESTDIR=/tmp/dist/libtorrent-rakshasa install >> $log 2>&1
     mkdir -p /root/dist
-    fpm -f -C /tmp/dist/libtorrent-rakshasa -p /root/dist/libtorrent-rakshasa_VERSION.deb -s dir -t deb -n libtorrent-rakshasa --version ${VERSION} --description "libtorrent-rakshasa compiled by swizzin" >/dev/null 2>&1
-    dpkg -i /root/dist/libtorrent-rakshasa_${VERSION}.deb >>$log 2>&1
+    fpm -f -C /tmp/dist/libtorrent-rakshasa -p /root/dist/libtorrent-rakshasa_VERSION.deb -s dir -t deb -n libtorrent-rakshasa --version ${VERSION} --description "libtorrent-rakshasa compiled by swizzin" > /dev/null 2>&1
+    dpkg -i /root/dist/libtorrent-rakshasa_${VERSION}.deb >> $log 2>&1
     cd /tmp
     rm -rf /tmp/dist/libtorrent-rakshasa
     rm -rf libtorrent*
@@ -242,11 +240,11 @@ function build_rtorrent() {
     rm_if_exists "/tmp/rtorrent*"
     mkdir /tmp/rtorrent
     curl -sL ${rtorrentloc} -o /tmp/rtorrent-${rtorrentver}.tar.gz
-    tar -xzf /tmp/rtorrent-${rtorrentver}.tar.gz -C /tmp/rtorrent --strip-components=1 >>$log 2>&1
+    tar -xzf /tmp/rtorrent-${rtorrentver}.tar.gz -C /tmp/rtorrent --strip-components=1 >> $log 2>&1
     VERSION=$rtorrentver
     cd /tmp/rtorrent
     if [[ -f /root/rtorrent-${rtorrentver}.patch ]]; then
-        patch -p1 </root/rtorrent-${rtorrentver}.patch >>${log} 2>&1 || {
+        patch -p1 < /root/rtorrent-${rtorrentver}.patch >> ${log} 2>&1 || {
             echo _error "Something went wrong when patching rTorrent"
             exit 1
         }
@@ -257,64 +255,64 @@ function build_rtorrent() {
     #apply memory leak fixes to 0.9.8 branches bases only (0.9.8, UDNS, PGO) to reduce maintenance and testing
     #apply first thing to ensure compatibility with the tracker delay scrape patch by modifying higher line numbers first
     if [[ ${rtorrentver} == "0.9.8" ]]; then
-        patch -p1 </etc/swizzin/sources/patches/rtorrent/rtorrent-ml-fixes-0.9.8.patch >>"$log" 2>&1
+        patch -p1 < /etc/swizzin/sources/patches/rtorrent/rtorrent-ml-fixes-0.9.8.patch >> "$log" 2>&1
     fi
     #apply tracker delay scrape patch to UDNS branch
     if [[ ${libudns} == "true" ]]; then
-        patch -p1 </etc/swizzin/sources/patches/rtorrent/rtorrent-scrape-0.9.8.patch >>"$log" 2>&1
-        patch -p1 </etc/swizzin/sources/patches/rtorrent/fast-session-loading-0.9.8.patch >>"$log" 2>&1
+        patch -p1 < /etc/swizzin/sources/patches/rtorrent/rtorrent-scrape-0.9.8.patch >> "$log" 2>&1
+        patch -p1 < /etc/swizzin/sources/patches/rtorrent/fast-session-loading-0.9.8.patch >> "$log" 2>&1
     fi
     #apply lockfile-fix to all rtorrents
-    patch -p1 </etc/swizzin/sources/patches/rtorrent/lockfile-fix.patch >>"$log" 2>&1
+    patch -p1 < /etc/swizzin/sources/patches/rtorrent/lockfile-fix.patch >> "$log" 2>&1
     #apply xmlrpc-fix to all rtorrents
-    patch -p1 </etc/swizzin/sources/patches/rtorrent/xmlrpc-fix.patch >>"$log" 2>&1
+    patch -p1 < /etc/swizzin/sources/patches/rtorrent/xmlrpc-fix.patch >> "$log" 2>&1
     #apply xmlrpc-logic-fix to all rtorrents
-    patch -p1 </etc/swizzin/sources/patches/rtorrent/xmlrpc-logic-fix.patch >>"$log" 2>&1
+    patch -p1 < /etc/swizzin/sources/patches/rtorrent/xmlrpc-logic-fix.patch >> "$log" 2>&1
     #apply scgi-fix to all rtorrents
-    patch -p1 </etc/swizzin/sources/patches/rtorrent/scgi-fix.patch >>"$log" 2>&1
+    patch -p1 < /etc/swizzin/sources/patches/rtorrent/scgi-fix.patch >> "$log" 2>&1
     #apply session-file-fix to all rtorrents
-    patch -p1 </etc/swizzin/sources/patches/rtorrent/session-file-fix.patch >>"$log" 2>&1
+    patch -p1 < /etc/swizzin/sources/patches/rtorrent/session-file-fix.patch >> "$log" 2>&1
     #use pkgconfig for cppunit if 0.9.6
     stdc=
     if [[ ${rtorrentver} == "0.9.6" ]]; then
-        patch -p1 </etc/swizzin/sources/patches/rtorrent/rtorrent-0.9.6.patch >>"$log" 2>&1
+        patch -p1 < /etc/swizzin/sources/patches/rtorrent/rtorrent-0.9.6.patch >> "$log" 2>&1
         stdc="-std=c++11"
     fi
-    ./autogen.sh >>$log 2>&1
-    ./configure --prefix=/usr --with-xmlrpc-c >>$log 2>&1 || {
+    ./autogen.sh >> $log 2>&1
+    ./configure --prefix=/usr --with-xmlrpc-c >> $log 2>&1 || {
         echo_error "Something went wrong while configuring rtorrent"
         exit 1
     }
     if [[ ${rtorrentpgo} == "true" ]]; then
         echo_log_only "Begin fprofile generate for rTorrent"
-        make -j$(nproc) CXXFLAGS="-w ${rtorrentlevel} ${rtorrentflto} ${rtorrentpipe} ${stdc} -fprofile-generate" >>$log 2>&1 || {
+        make -j$(nproc) CXXFLAGS="-w ${rtorrentlevel} ${rtorrentflto} ${rtorrentpipe} ${stdc} -fprofile-generate" >> $log 2>&1 || {
             echo_error "Something went wrong while making rtorrent with -fprofile-generate"
             exit 1
         }
-        make install >>$log 2>&1
+        make install >> $log 2>&1
         echo_info "Running rTorrent PGO for 30s. Please wait..."
         touch ~/.rtorrent.rc
         screen -d -m -fa -S rtorrent_pgo rtorrent
         sleep 30
         screen -X -S rtorrent_pgo quit
         rm_if_exists "~/.rtorrent.rc"
-        make clean >>$log 2>&1
+        make clean >> $log 2>&1
         echo_log_only "End fprofile generate for rTorrent"
     fi
-    make -j$(nproc) CXXFLAGS="-w ${rtorrentlevel} ${rtorrentflto} ${rtorrentpipe} ${stdc} ${rtorrentprofile}" >>$log 2>&1 || {
+    make -j$(nproc) CXXFLAGS="-w ${rtorrentlevel} ${rtorrentflto} ${rtorrentpipe} ${stdc} ${rtorrentprofile}" >> $log 2>&1 || {
         echo_error "Something went wrong while making rtorrent"
         exit 1
     }
     rm_if_exists "/tmp/dist/rtorrent"
-    make DESTDIR=/tmp/dist/rtorrent install >>$log 2>&1
+    make DESTDIR=/tmp/dist/rtorrent install >> $log 2>&1
     mkdir -p /root/dist
-    fpm -f -C /tmp/dist/rtorrent -p /root/dist/rtorrent_VERSION.deb -s dir -t deb -n rtorrent --version ${VERSION} --description "rtorrent compiled by swizzin" >/dev/null 2>&1
-    dpkg -i /root/dist/rtorrent_${VERSION}.deb >>$log 2>&1
+    fpm -f -C /tmp/dist/rtorrent -p /root/dist/rtorrent_VERSION.deb -s dir -t deb -n rtorrent --version ${VERSION} --description "rtorrent compiled by swizzin" > /dev/null 2>&1
+    dpkg -i /root/dist/rtorrent_${VERSION}.deb >> $log 2>&1
     cd "/tmp"
-    ldconfig >>$log 2>&1
-    rm -rf rtorrent* >>$log 2>&1
+    ldconfig >> $log 2>&1
+    rm -rf rtorrent* >> $log 2>&1
     rm -rf /tmp/dist/rtorrent
-    apt-mark hold rtorrent >>${log} 2>&1
+    apt-mark hold rtorrent >> ${log} 2>&1
 }
 
 function rtorrent_apt() {
@@ -329,19 +327,19 @@ function remove_rtorrent() {
     fi
     for c in ${toclean[@]}; do
         # TODO add option to pass extra flags
-        apt-get remove -y -q --allow-change-held-packages $c >>$log 2>&1
+        apt-get remove -y -q --allow-change-held-packages $c >> $log 2>&1
     done
-    apt-get autoremove -y >>$log 2>&1
+    apt-get autoremove -y >> $log 2>&1
 }
 
 function remove_rtorrent_legacy() {
     rm -rf /usr/bin/rtorrent
     cd /tmp
-    git clone https://github.com/rakshasa/libtorrent.git libtorrent >>/dev/null 2>&1
+    git clone https://github.com/rakshasa/libtorrent.git libtorrent >> /dev/null 2>&1
     cd libtorrent
-    ./autogen.sh >>$log 2>&1
-    ./configure --prefix=/usr >>$log 2>&1
-    make uninstall >>$log 2>&1
+    ./autogen.sh >> $log 2>&1
+    ./configure --prefix=/usr >> $log 2>&1
+    make uninstall >> $log 2>&1
     cd -
     rm -rf /tmp/libtorrent
 }

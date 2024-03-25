@@ -1,14 +1,14 @@
 #!/bin/bash
 
 function rutorrent_install() {
-    apt_install sox geoip-database p7zip-full zip unzip
+    apt_install sox geoip-database p7zip-full zip unzip php-bcmath
 
     mkdir -p /srv
     if [[ ! -d /srv/rutorrent ]]; then
         echo_progress_start "Cloning ruTorrent"
         # Get current stable ruTorrent version
         release=$(git ls-remote --tags --refs https://github.com/novik/ruTorrent.git | awk '{sub("refs/tags/", ""); print $2 }' | grep -v beta | sort -Vr | head -n1)
-        git clone --recurse-submodules --depth 1 -b ${release} https://github.com/Novik/ruTorrent.git /srv/rutorrent >>"$log" 2>&1 || {
+        git clone --recurse-submodules --depth 1 -b ${release} https://github.com/Novik/ruTorrent.git /srv/rutorrent >> "$log" 2>&1 || {
             echo_error "Failed to clone ruTorrent"
             exit 1
         }
@@ -17,6 +17,7 @@ function rutorrent_install() {
         rm -rf /srv/rutorrent/plugins/_cloudflare
         rm -rf /srv/rutorrent/plugins/extratio
         rm -rf /srv/rutorrent/plugins/rpc
+        rm -rf /srv/rutorrent/plugins/geoip
         rm -rf /srv/rutorrent/conf/config.php
         echo_progress_done "ruTorrent cloned"
     fi
@@ -26,26 +27,27 @@ function rutorrent_install() {
     sed -i 's/pathToCreatetorrent = '\'\''/pathToCreatetorrent = '\''\/usr\/bin\/mktorrent'\''/' /srv/rutorrent/plugins/create/conf.php
     sed -i "s/\$pathToExternals\['sox'\] = ''/\$pathToExternals\['sox'\] = '\/usr\/bin\/sox'/g" /srv/rutorrent/plugins/spectrogram/conf.php
 
-    #shellcheck source=sources/functions/utils
     . /etc/swizzin/sources/functions/utils
     install_rar
 
-    #if [[ ! -d /srv/rutorrent/plugins/theme/themes/club-QuickBox ]]; then
-    #    git clone https://github.com/QuickBox/club-QuickBox /srv/rutorrent/plugins/theme/themes/club-QuickBox >> "$log" 2>&1 || { echo_error "git of autodl plugin to main plugins seems to have failed"; }
-    #    perl -pi -e "s/\$defaultTheme \= \"\"\;/\$defaultTheme \= \"club-QuickBox\"\;/g" /srv/rutorrent/plugins/theme/conf.php
-    #fi
-
     if [[ ! -d /srv/rutorrent/plugins/filemanager ]]; then
-        git clone https://github.com/nelu/rutorrent-filemanager /srv/rutorrent/plugins/filemanager >>${log} 2>&1 || { echo_error "git of autodl plugin to main plugins seems to have failed"; }
+        git clone https://github.com/nelu/rutorrent-filemanager /srv/rutorrent/plugins/filemanager >> ${log} 2>&1 || {
+            echo_error "git of file-manager plugin to main plugins seems to have failed"
+        }
         rutorrent_fm_config
-        #pinning filemanager should no longer be required
-        #git -C /srv/rutorrent/plugins/filemanager checkout 234f5f20841ad3d1e3c095e6c6954a875fc8a6ea >> ${log} 2>&1
     fi
 
     if [[ ! -d /srv/rutorrent/plugins/ratiocolor ]]; then
-        cd /srv/rutorrent/plugins
-        svn co https://github.com/Gyran/rutorrent-ratiocolor.git/trunk ratiocolor >>"$log" 2>&1
-        sed -i "s/changeWhat = \"cell-background\";/changeWhat = \"font\";/g" /srv/rutorrent/plugins/ratiocolor/init.js || { echo_error "git of autodl plugin to main plugins seems to have failed"; }
+        git clone https://github.com/Gyran/rutorrent-ratiocolor /srv/rutorrent/plugins/ratiocolor >> "$log" 2>&1
+        sed -i "s/changeWhat = \"cell-background\";/changeWhat = \"font\";/g" /srv/rutorrent/plugins/ratiocolor/init.js || {
+            echo_error "git of ratio plugin to main plugins seems to have failed"
+        }
+    fi
+
+    if [[ ! -d /srv/rutorrent/plugins/geoip2 ]]; then
+        git clone https://github.com/Micdu70/geoip2-rutorrent /srv/rutorrent/plugins/geoip2 >> ${log} 2>&1 || {
+            echo_error "git of geoip2 plugin to main plugins seems to have failed"
+        }
     fi
 
     echo_progress_done "Plugins downloaded"
@@ -54,7 +56,7 @@ function rutorrent_install() {
         rutorrent_fix_quota
     fi
 
-    cat >/srv/rutorrent/conf/config.php <<'RUC'
+    cat > /srv/rutorrent/conf/config.php << 'RUC'
 <?php
 	// configuration parameters
 
@@ -84,7 +86,7 @@ function rutorrent_install() {
 
 	$do_diagnostic = true;			// Diagnose ruTorrent. Recommended to keep enabled, unless otherwise required.
 	$al_diagnostic = true;			// Diagnose auto-loader. Set to "false" to make composer plugins work.
-	
+
 	$log_file = '/tmp/errors.log';		// path to log file (comment or leave blank to disable logging)
 
 	$saveUploadedTorrents = true;		// Save uploaded torrents to profile/torrents directory or not
@@ -96,15 +98,15 @@ function rutorrent_install() {
 	//$scgi_port = 5000;
 	//$scgi_host = "127.0.0.1";
 
-	// For web->rtorrent link through unix domain socket 
-	// (scgi_local in rtorrent conf file), change variables 
+	// For web->rtorrent link through unix domain socket
+	// (scgi_local in rtorrent conf file), change variables
 	// above to something like this:
 	//
 	// $scgi_port = 0;
 	// $scgi_host = "unix:///tmp/rpc.socket";
 
 	//$XMLRPCMountPoint = "/RPC2";		// DO NOT DELETE THIS LINE!!! DO NOT COMMENT THIS LINE!!!
-	
+
 	$throttleMaxSpeed = 327625*1024;	// DO NOT EDIT THIS LINE!!! DO NOT COMMENT THIS LINE!!!
 	// Can't be greater then 327625*1024 due to limitation in libtorrent ResourceManager::set_max_upload_unchoked function.
 
@@ -115,10 +117,10 @@ function rutorrent_install() {
 		"id"	=> '',			// Something like /usr/bin/id. If empty, will be found in PATH.
 		"stat"	=> '',			// Something like /usr/bin/stat. If empty, will be found in PATH.
 	);
-	
+
 	$localHostedMode = true; 		// Set to true if rTorrent is hosted on the SAME machine as ruTorrent
-	
-	$cachedPluginLoading = false;	// Set to true to enable rapid cached loading of ruTorrent plugins	
+
+	$cachedPluginLoading = false;	// Set to true to enable rapid cached loading of ruTorrent plugins
                                     // Required to clear web browser cache when upgrading versions
 
 	$localhosts = array( 			// list of local interfaces
@@ -147,7 +149,7 @@ function rutorrent_fm_config() {
     # Reconfigure file manager plugin for ARM64 support
     # rar is not supported on arm, so it needs to be dropped
     if [[ "$(_os_arch)" = "arm64" ]]; then
-        cat >/srv/rutorrent/plugins/filemanager/conf.php <<'RUFMC'
+        cat > /srv/rutorrent/plugins/filemanager/conf.php << 'RUFMC'
 <?php
 
     global $pathToExternals;
@@ -185,7 +187,7 @@ function rutorrent_fm_config() {
    $config['archive']['type']['tar.gz']['multipass'] = ['tar', 'gzip'];
    $config['archive']['type']['tar.bz2']['multipass'] = ['tar', 'bzip2'];
    $config['archive']['type']['tar.7z']['multipass'] = ['tar', '7z'];
-   $config['archive']['type']['tar.xz']['multipass'] = ['tar', 'xz'];        
+   $config['archive']['type']['tar.xz']['multipass'] = ['tar', 'xz'];
 RUFMC
     fi
 }
@@ -194,7 +196,7 @@ function rutorrent_nginx_config() {
     if [[ ! -f /etc/nginx/apps/rutorrent.conf ]]; then
         phpversion=$(php_service_version)
         sock="php${phpversion}-fpm"
-        cat >/etc/nginx/apps/rutorrent.conf <<RUM
+        cat > /etc/nginx/apps/rutorrent.conf << RUM
 location /rutorrent {
   auth_basic "What's the password?";
   auth_basic_user_file /etc/htpasswd;
@@ -211,16 +213,16 @@ RUM
     fi
 
     if [[ ! -f /etc/nginx/apps/rindex.conf ]]; then
-        cat >/etc/nginx/apps/rindex.conf <<RIN
+        cat > /etc/nginx/apps/rindex.conf << RIN
 location /rtorrent.downloads {
   alias /home/\$remote_user/torrents/rtorrent;
   include /etc/nginx/snippets/fancyindex.conf;
   auth_basic "What's the password?";
   auth_basic_user_file /etc/htpasswd;
-  
+
   location ~* \.php($|/) {
 
-  } 
+  }
 }
 RIN
     fi
@@ -231,7 +233,7 @@ function rutorrent_user_config() {
     for user in "${users[@]}"; do
         if [[ ! -f /srv/rutorrent/conf/users/${user}/config.php ]]; then
             mkdir -p /srv/rutorrent/conf/users/${user}/
-            cat >/srv/rutorrent/conf/users/${user}/config.php <<RUU
+            cat > /srv/rutorrent/conf/users/${user}/config.php << RUU
 <?php
 \$topDirectory = '/home/${user}';
 \$scgi_port = 0;
@@ -243,7 +245,7 @@ RUU
         fi
 
         if [[ ! -f /etc/nginx/apps/${user}.scgi.conf ]]; then
-            cat >/etc/nginx/apps/${user}.scgi.conf <<RUC
+            cat > /etc/nginx/apps/${user}.scgi.conf << RUC
 location /${user} {
 include scgi_params;
 scgi_pass unix:/var/run/${user}/.rtorrent.sock;
@@ -256,7 +258,7 @@ RUC
 }
 
 function rutorrent_fix_quota() {
-    cat >/srv/rutorrent/plugins/diskspace/action.php <<'DSKSP'
+    cat > /srv/rutorrent/plugins/diskspace/action.php << 'DSKSP'
 <?php
 #################################################################################
 ##  [Quick Box - action.php modified for quota systems use]

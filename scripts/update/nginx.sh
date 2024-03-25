@@ -62,6 +62,12 @@ function update_nginx() {
         echo_progress_done
     done
 
+    if [[ ! -d /srv/fancyindex ]]; then
+        git clone https://github.com/Naereen/Nginx-Fancyindex-Theme/ /tmp/fancyindex >> $log 2>&1
+        mv /tmp/fancyindex/Nginx-Fancyindex-Theme-dark /srv/fancyindex >> $log 2>&1
+        rm -rf /tmp/fancyindex
+    fi
+
     if grep -q -e "-dark" -e "Nginx-Fancyindex" /srv/fancyindex/header.html; then
         echo_progress_start "Updating fancyindex theme"
         sed -i 's/href="\/[^\/]*/href="\/fancyindex/g' /srv/fancyindex/header.html
@@ -198,6 +204,13 @@ FIAC
         sed 's|listen 443 ssl default_server;|listen 443 ssl http2 default_server;|g' -i /etc/nginx/sites-enabled/default
         # IPV6 http2 upgrade
         sed 's|listen \[::]\:443 ssl default_server;|listen \[::]\:443 ssl http2 default_server;|g' -i /etc/nginx/sites-enabled/default
+        echo_progress_done
+    fi
+
+    # Disable emitting nginx version for HTTP protocol
+    if [[ $(grep -c 'server_tokens' /etc/nginx/sites-enabled/default) -lt 2 ]]; then
+        echo_progress_start "Disable emitting nginx version for HTTP protocol"
+        sed '/listen 80 default_server;/a \ \ server_tokens off;' -i /etc/nginx/sites-enabled/default
         echo_progress_done
     fi
 
