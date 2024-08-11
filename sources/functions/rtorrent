@@ -130,7 +130,7 @@ function depends_rtorrent() {
     rm_if_exists "/tmp/mktorrent"
     unzip -d mktorrent -j mktorrent.zip >> $log 2>&1
     cd mktorrent
-    make >> $log 2>&1
+    make -j$(nproc) CC=gcc CFLAGS="-w ${rtorrentflto} ${rtorrentpipe} ${rtorrentlevel}" >> $log 2>&1
     make install PREFIX=/usr >> $log 2>&1
     cd /tmp
     rm -rf mktorrent*
@@ -153,7 +153,7 @@ function build_xmlrpc-c() {
     . /etc/swizzin/sources/functions/utils
     rm_if_exists "/tmp/xmlrpc-c"
     rm_if_exists "/tmp/dist/xmlrpc-c "
-    svn checkout svn://svn.code.sf.net/p/xmlrpc-c/code/super_stable /tmp/xmlrpc-c >> $log 2>&1;
+    svn checkout svn://svn.code.sf.net/p/xmlrpc-c/code/stable@3212 /tmp/xmlrpc-c >> $log 2>&1;
     cd /tmp/xmlrpc-c
     cp -rf /etc/swizzin/sources/patches/rtorrent/xmlrpc-config.guess config.guess >> $log 2>&1
     cp -rf /etc/swizzin/sources/patches/rtorrent/xmlrpc-config.sub config.sub >> $log 2>&1
@@ -163,7 +163,7 @@ function build_xmlrpc-c() {
     }
     source <(sed 's/ //g' version.mk)
     VERSION=$XMLRPC_MAJOR_RELEASE.$XMLRPC_MINOR_RELEASE.$XMLRPC_POINT_RELEASE
-    make -j$(nproc) CFLAGS="-w ${rtorrentflto} ${rtorrentpipe}" >> $log 2>&1
+    make -j$(nproc) CFLAGS="-w ${rtorrentlevel} ${rtorrentflto} ${rtorrentpipe}" >> $log 2>&1
     make DESTDIR=/tmp/dist/xmlrpc-c install >> $log 2>&1 || {
         echo_error "Something went wrong while making xmlrpc"
         exit 1
@@ -199,6 +199,7 @@ function build_libtorrent_rakshasa() {
     if [[ ${libudns} == "true" ]]; then
         patch -p1 < /etc/swizzin/sources/patches/rtorrent/libtorrent-udns-0.13.8.patch >> "$log" 2>&1
         patch -p1 < /etc/swizzin/sources/patches/rtorrent/libtorrent-scanf-0.13.8.patch >> "$log" 2>&1
+        patch -p1 < /etc/swizzin/sources/patches/rtorrent/lookup-cache-0.13.8.patch >> "$log" 2>&1
     fi
     if [[ ${libtorrentver} =~ ^("0.13.7"|"0.13.8")$ ]]; then
         patch -p1 < /etc/swizzin/sources/patches/rtorrent/throttle-fix-0.13.7-8.patch >> "$log" 2>&1
@@ -214,7 +215,7 @@ function build_libtorrent_rakshasa() {
         fi
     fi
     ./autogen.sh >> $log 2>&1
-    ./configure --prefix=/usr >> $log 2>&1 || {
+    ./configure --prefix=/usr --enable-aligned >> $log 2>&1 || {
         echo_error "Something went wrong while configuring libtorrent"
         exit 1
     }
@@ -251,13 +252,26 @@ function build_rtorrent() {
     else
         echo_log_only "No rTorrent patch found at /root/rtorrent-${rtorrentver}.patch"
     fi
+    #apply memory leak fixes to 0.9.8 branches bases only (0.9.8, UDNS, PGO) to reduce maintenance and testing
+    #apply first thing to ensure compatibility with the tracker delay scrape patch by modifying higher line numbers first
+    if [[ ${rtorrentver} == "0.9.8" ]]; then
+        patch -p1 < /etc/swizzin/sources/patches/rtorrent/rtorrent-ml-fixes-0.9.8.patch >> "$log" 2>&1
+    fi
+    #apply tracker delay scrape patch to UDNS branch	
     if [[ ${libudns} == "true" ]]; then
         patch -p1 < /etc/swizzin/sources/patches/rtorrent/rtorrent-scrape-0.9.8.patch >> "$log" 2>&1
+        patch -p1 < /etc/swizzin/sources/patches/rtorrent/fast-session-loading-0.9.8.patch >> "$log" 2>&1
     fi
     #apply lockfile-fix to all rtorrents
     patch -p1 < /etc/swizzin/sources/patches/rtorrent/lockfile-fix.patch >> "$log" 2>&1
     #apply xmlrpc-fix to all rtorrents
     patch -p1 < /etc/swizzin/sources/patches/rtorrent/xmlrpc-fix.patch >> "$log" 2>&1
+    #apply xmlrpc-logic-fix to all rtorrents
+    patch -p1 < /etc/swizzin/sources/patches/rtorrent/xmlrpc-logic-fix.patch >> "$log" 2>&1
+    #apply scgi-fix to all rtorrents
+    patch -p1 < /etc/swizzin/sources/patches/rtorrent/scgi-fix.patch >> "$log" 2>&1
+    #apply session-file-fix to all rtorrents
+    patch -p1 < /etc/swizzin/sources/patches/rtorrent/session-file-fix.patch >> "$log" 2>&1
     #use pkgconfig for cppunit if 0.9.6
     stdc=
     if [[ ${rtorrentver} == "0.9.6" ]]; then

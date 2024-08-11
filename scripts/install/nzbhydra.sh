@@ -20,7 +20,7 @@ fi
 
 username=$(_get_master_username)
 
-case $(os_codename) in
+case $(_os_codename) in
     bullseye)
         java=openjdk-17-jdk-headless
         ;;
@@ -28,7 +28,7 @@ case $(os_codename) in
         java=default-jre-headless
         ;;
 esac
-LIST='unzip $java'
+LIST="unzip $java"
 apt_install $LIST
 
 echo_progress_start "Installing NZBHydra ${latestversion}"
@@ -41,7 +41,7 @@ wget -O nzbhydra2.zip ${latest} >> ${log} 2>&1
 unzip nzbhydra2.zip >> ${log} 2>&1
 rm -f nzbhydra2.zip
 
-chmod +x nzbhydra2
+chmod +x nzbhydra2 nzbhydra2wrapperPy3.py
 chown -R ${username}: /opt/nzbhydra2
 echo_progress_done
 
@@ -73,7 +73,7 @@ WorkingDirectory=/opt/nzbhydra2
 # NZBHydra stores its data in a "data" subfolder of its installation path
 # To change that set the --datafolder parameter:
 # --datafolder /path-to/datafolder
-ExecStart=/opt/nzbhydra2/nzbhydra2 --nobrowser --datafolder /home/${username}/.config/nzbhydra2 --nopidfile
+ExecStart=/opt/nzbhydra2/nzbhydra2wrapperPy3.py --nobrowser --datafolder /home/${username}/.config/nzbhydra2 --nopidfile
 
 Restart=always
 
