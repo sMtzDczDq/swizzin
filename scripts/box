@@ -50,9 +50,9 @@ function _install() {
             installa+=("$i" '""')
         fi
     done
-    whiptail --title "Install Software" --checklist --noitem --separate-output "Make some choices:" 15 26 7 "${installa[@]}" 2>results
+    whiptail --title "Install Software" --checklist --noitem --separate-output "Make some choices:" 15 26 7 "${installa[@]}" 2> results
 
-    readarray -t result <results
+    readarray -t result < results
     for result in "${result[@]}"; do
         echo_info "Installing ${result}"
         bash "/usr/local/bin/swizzin/install/${result}.sh"
@@ -71,8 +71,8 @@ function _remove() {
             removea+=("$i" '""')
         fi
     done
-    whiptail --title "Remove Software" --noitem --checklist --separate-output "Make some choices:" 15 26 7 "${removea[@]}" 2>results
-    readarray -t result <results
+    whiptail --title "Remove Software" --noitem --checklist --separate-output "Make some choices:" 15 26 7 "${removea[@]}" 2> results
+    readarray -t result < results
     for result in "${result[@]}"; do
         echo_info -e "Removing ${result}"
         bash /usr/local/bin/swizzin/remove/${result}.sh
@@ -138,33 +138,33 @@ function _update() {
 
     #Checking for EOL releases
     case "$(_os_codename)" in
-    "focal" | "buster" | "bullseye" | "jammy" | "bookworm")
-        echo_log_only "OS supported"
-        ;;
-    *)
-        name=$(_os_codename)
-        echo_warn "${name^} is not supported by swizzin at this stage.
+        "focal" | "buster" | "bullseye" | "jammy" | "bookworm" | "noble")
+            echo_log_only "OS supported"
+            ;;
+        *)
+            name=$(_os_codename)
+            echo_warn "${name^} is not supported by swizzin at this stage.
 You will not be receiving any new updates past the last supported commit. Swizzin will continue to run as-is.
 We URGE you to migrate to a supported release if/while you still have the chance."
-        SWIZ_GIT_REF="tags/eol-$(_os_codename)"
-        export SWIZ_GIT_REF
-        ;;
+            SWIZ_GIT_REF="tags/eol-$(_os_codename)"
+            export SWIZ_GIT_REF
+            ;;
     esac
     echo_log_only "noupdate = $noupdate"
     # If there is nothing blocking the update...
     if [[ -z $noupdate ]]; then
         # Run the git update procedure
         echo_progress_start "Updating swizzin local repository"
-        git -C /etc/swizzin checkout "${SWIZ_GIT_REF:-master}" >>$log 2>&1 ||
+        git -C /etc/swizzin checkout "${SWIZ_GIT_REF:-master}" >> $log 2>&1 ||
             {
                 echo_warn "Unclean repo detected, resetting current branch."
-                git -C /etc/swizzin reset --hard >>$log 2>&1
-                git -C /etc/swizzin checkout "${SWIZ_GIT_REF:-master}" >>$log 2>&1
+                git -C /etc/swizzin reset --hard >> $log 2>&1
+                git -C /etc/swizzin checkout "${SWIZ_GIT_REF:-master}" >> $log 2>&1
             }
         {
             #shellcheck disable=SC2129
-            git -C /etc/swizzin fetch --all --tags --prune >>$log 2>&1
-            git -C /etc/swizzin reset --hard "${SWIZ_GIT_REF:-origin/master}" >>$log 2>&1
+            git -C /etc/swizzin fetch --all --tags --prune >> $log 2>&1
+            git -C /etc/swizzin reset --hard "${SWIZ_GIT_REF:-origin/master}" >> $log 2>&1
         } || {
             echo_error "Failed to update from git"
             exit 1
@@ -268,13 +268,13 @@ function _adduser() {
     fi
 
     if [[ -z $SETUP_USER ]]; then #If this is not coming from setup.sh...
-        if [[ "$(cut -d: -f1 </root/.master.info 2>/dev/null)" = "$user" ]]; then
+        if [[ "$(cut -d: -f1 < /root/.master.info 2> /dev/null)" = "$user" ]]; then
             echo_error "User already exists within swizzin"
             exit 1
         fi
     fi
 
-    if id -u "${user}" >/dev/null 2>&1; then
+    if id -u "${user}" > /dev/null 2>&1; then
         echo_info "The user ${user} already appears to be present on this machine; however, it does not appear to be configured as a swizzin user.\nThe user will be added to swizzin."
         ask "Continue setting up user?" Y || exit 1
         existing=true
@@ -282,20 +282,20 @@ function _adduser() {
 
     password_check
 
-    echo "$user:$pass" >/root/"${user}".info
+    echo "$user:$pass" > /root/"${user}".info
     if [[ $existing != "true" ]]; then
-        useradd "${user}" -m -G www-data -s /bin/bash >>$log 2>&1
+        useradd "${user}" -m -G www-data -s /bin/bash >> $log 2>&1
     fi
-    chpasswd <<<"${user}:${pass}" >>$log 2>&1
+    chpasswd <<< "${user}:${pass}" >> $log 2>&1
     if [[ -f /etc/htpasswd ]]; then
         echo_log_only "htpasswd file exists"
-        htpasswd -b /etc/htpasswd "$user" "$pass" >>$log 2>&1
+        htpasswd -b /etc/htpasswd "$user" "$pass" >> $log 2>&1
     else
         echo_log_only "creating htpasswd file"
-        htpasswd -b -c /etc/htpasswd "$user" "$pass" >>$log 2>&1
+        htpasswd -b -c /etc/htpasswd "$user" "$pass" >> $log 2>&1
     fi
     mkdir -p /etc/htpasswd.d/
-    htpasswd -b -c /etc/htpasswd.d/htpasswd."${user}" "$user" "$pass" >>$log 2>&1
+    htpasswd -b -c /etc/htpasswd.d/htpasswd."${user}" "$user" "$pass" >> $log 2>&1
 
     if [[ -f /install/.quota.lock ]]; then
         bash /etc/swizzin/scripts/setdisk "$user"
@@ -306,30 +306,30 @@ function _adduser() {
     chmod 750 /home/"${user}"
 
     if [[ -f /install/.panel.lock ]]; then setfacl -m g:swizzin:rx /home/"${user}"; fi
-    echo "D /var/run/${user} 0750 ${user} ${user} -" >>/etc/tmpfiles.d/"${user}".conf
-    systemd-tmpfiles /etc/tmpfiles.d/"${user}".conf --create >>$log 2>&1
+    echo "D /var/run/${user} 0750 ${user} ${user} -" >> /etc/tmpfiles.d/"${user}".conf
+    systemd-tmpfiles /etc/tmpfiles.d/"${user}".conf --create >> $log 2>&1
 
     for app in rtorrent rutorrent deluge autodl autobrr flood nzbget lounge transmission wireguard organizr mango qbittorrent; do
         if [[ -f /install/.${app}.lock ]]; then
             case $app in
-            autodl)
-                /usr/local/bin/swizzin/install/${app}.sh "${user}"
-                ;;
-            deluge)
-                /usr/local/bin/swizzin/install/${app}.sh "${user}"
-                app="{deluged,deluge-web}"
-                eval systemctl enable -q ${app}@"${user}"
-                eval systemctl start ${app}@"${user}"
-                ;;
-            rutorrent)
-                if [[ ! -f /install/.rutorrent.lock ]]; then touch /install/.rutorrent.lock; fi
-                /usr/local/bin/swizzin/install/${app}.sh
-                ;;
-            *)
-                /usr/local/bin/swizzin/install/${app}.sh "${user}"
-                systemctl enable -q ${app}@"${user}"
-                systemctl start ${app}@"${user}"
-                ;;
+                autodl)
+                    /usr/local/bin/swizzin/install/${app}.sh "${user}"
+                    ;;
+                deluge)
+                    /usr/local/bin/swizzin/install/${app}.sh "${user}"
+                    app="{deluged,deluge-web}"
+                    eval systemctl enable -q ${app}@"${user}"
+                    eval systemctl start ${app}@"${user}"
+                    ;;
+                rutorrent)
+                    if [[ ! -f /install/.rutorrent.lock ]]; then touch /install/.rutorrent.lock; fi
+                    /usr/local/bin/swizzin/install/${app}.sh
+                    ;;
+                *)
+                    /usr/local/bin/swizzin/install/${app}.sh "${user}"
+                    systemctl enable -q ${app}@"${user}"
+                    systemctl start ${app}@"${user}"
+                    ;;
             esac
         fi
 
@@ -343,9 +343,9 @@ function _adduser() {
     if [[ -n $SETUP_USER ]]; then
         usermod -a -G sudo "$user"
         rm /root/"$user".info
-        echo "$user:$pass" >/root/.master.info
+        echo "$user:$pass" > /root/.master.info
     elif [[ -z $SETUP_USER ]]; then # Only for non-master users, therefore only if this is not coming from setup.sh
-        cat >/etc/sudoers.d/"${user}" <<SUD
+        cat > /etc/sudoers.d/"${user}" << SUD
 Cmnd_Alias   ${USER}CMDS = /bin/systemctl stop flood@${user}, /bin/systemctl restart flood@${user}, /bin/systemctl start flood@${user}, /bin/systemctl start rtorrent@${user}, /bin/systemctl stop rtorrent@${user}, /bin/systemctl restart rtorrent@${user}, /bin/systemctl start deluged@${user}, /bin/systemctl stop deluged@${user}, /bin/systemctl restart deluged@${user}, /bin/systemctl start deluge-web@${user}, /bin/systemctl stop deluge-web@${user}, /bin/systemctl restart deluge-web@${user}, /bin/systemctl start irssi@${user}, /bin/systemctl stop irssi@${user}, /bin/systemctl restart irssi@${user}, /bin/systemctl start qbittorrent@${user}, /bin/systemctl stop qbittorrent@${user}, /bin/systemctl restart qbittorrent@${user}, /usr/local/bin/swizzin/box chpasswd ${user}
 
 ${user}     ALL = (ALL) NOPASSWD: ${USER}CMDS
@@ -362,7 +362,7 @@ SUD
 function _deluser() {
     user=$2
     if [[ ! -f /root/${user}.info ]]; then
-        master=$(cut -d: -f1 </root/.master.info)
+        master=$(cut -d: -f1 < /root/.master.info)
         if [[ $user == "$master" ]]; then
             echo_warn "Master user deletion is not supported"
             exit 1
@@ -377,40 +377,40 @@ function _deluser() {
     for app in rtorrent rutorrent deluge autodl flood nzbget lounge transmission mango wireguard organizr qbittorrent autobrr; do
         if [[ -f /install/.${app}.lock ]]; then
             case $app in
-            autodl)
-                systemctl disable --now irssi@${user}
-                ;;
-            deluge)
-                app="{deluged,deluge-web}"
-                rm -rf /etc/nginx/conf.d/${user}.deluge.conf
-                eval systemctl disable ${app}@${user}
-                eval systemctl stop ${app}@${user}
-                ;;
-            lounge)
-                su -s /bin/sh lounge -c "thelounge remove ${user}" >/dev/null
-                ;;
-            mango)
-                if [[ -z $mangodir ]]; then mangodir="/opt/mango"; fi
-                su mango -c "$mangodir/mango admin user delete ${user}"
-                ;;
-            organizr)
-                #TODO automate removal steps
-                echo_info "Remember to manually remove the organizr account!"
-                ;;
-            rutorrent)
-                if [[ ! -f /install/.rutorrent.lock ]]; then touch /install/.rutorrent.lock; fi
-                rm -rf /srv/rutorrent/conf/users/${user}
-                rm -rf /srv/rutorrent/share/users/${user}
-                rm -f /etc/nginx/apps/${user}*
-                ;;
-            wireguard)
-                rm -rf /home/${user}/.wireguard
-                systemctl disable --now wg-quick@wg"$(id -u "$user")"
-                ;;
-            *)
-                systemctl disable ${app}@${user}
-                systemctl stop ${app}@${user}
-                ;;
+                autodl)
+                    systemctl disable --now irssi@${user}
+                    ;;
+                deluge)
+                    app="{deluged,deluge-web}"
+                    rm -rf /etc/nginx/conf.d/${user}.deluge.conf
+                    eval systemctl disable ${app}@${user}
+                    eval systemctl stop ${app}@${user}
+                    ;;
+                lounge)
+                    su -s /bin/sh lounge -c "thelounge remove ${user}" > /dev/null
+                    ;;
+                mango)
+                    if [[ -z $mangodir ]]; then mangodir="/opt/mango"; fi
+                    su mango -c "$mangodir/mango admin user delete ${user}"
+                    ;;
+                organizr)
+                    #TODO automate removal steps
+                    echo_info "Remember to manually remove the organizr account!"
+                    ;;
+                rutorrent)
+                    if [[ ! -f /install/.rutorrent.lock ]]; then touch /install/.rutorrent.lock; fi
+                    rm -rf /srv/rutorrent/conf/users/${user}
+                    rm -rf /srv/rutorrent/share/users/${user}
+                    rm -f /etc/nginx/apps/${user}*
+                    ;;
+                wireguard)
+                    rm -rf /home/${user}/.wireguard
+                    systemctl disable --now wg-quick@wg"$(id -u "$user")"
+                    ;;
+                *)
+                    systemctl disable ${app}@${user}
+                    systemctl stop ${app}@${user}
+                    ;;
             esac
         fi
     done
@@ -420,10 +420,10 @@ function _deluser() {
     fi
 
     lsof -t /home/${user} | xargs -I % kill -9 %
-    deluser --force --remove-home ${user} >>$log 2>&1
-    groupdel ${user} >>$log 2>&1
+    deluser --force --remove-home ${user} >> $log 2>&1
+    groupdel ${user} >> $log 2>&1
     rm -f /etc/htpasswd.d/htpasswd.${user}
-    htpasswd -D /etc/htpasswd ${user} >>$log 2>&1
+    htpasswd -D /etc/htpasswd ${user} >> $log 2>&1
     rm -f /etc/tmpfiles.d/${user}.conf
     rm -f /etc/nginx/conf.d/${user}*
     rm -f /etc/sudoers.d/${user}
@@ -446,59 +446,59 @@ function _chpasswd() {
     . /etc/swizzin/sources/functions/utils
     password_check
 
-    master=$(cut -d: -f1 </root/.master.info)
+    master=$(cut -d: -f1 < /root/.master.info)
     if [[ $user = "$master" ]]; then
-        echo "$user:$pass" >/root/.master.info
+        echo "$user:$pass" > /root/.master.info
     fi
-    echo "$user:$pass" >/root/${user}.info
-    chpasswd <<<"${user}:${pass}" >>$log 2>&1
-    htpasswd -b /etc/htpasswd $user "$pass" >>$log 2>&1
+    echo "$user:$pass" > /root/${user}.info
+    chpasswd <<< "${user}:${pass}" >> $log 2>&1
+    htpasswd -b /etc/htpasswd $user "$pass" >> $log 2>&1
     mkdir -p /etc/htpasswd.d/
-    htpasswd -b -c /etc/htpasswd.d/htpasswd.${user} $user "$pass" >>$log 2>&1
+    htpasswd -b -c /etc/htpasswd.d/htpasswd.${user} $user "$pass" >> $log 2>&1
     for app in autobrr deluge lounge mango organizr qbittorrent transmission; do
         if [[ -f /install/.${app}.lock ]]; then
             case $app in
-            autobrr)
-                echo -n "$pass" | /usr/bin/autobrrctl --config "/home/$user/.config/autobrr" change-password "$user"
-                ;;
-            deluge)
-                systemctl stop deluged@${user} >>$log 2>&1
-                systemctl stop deluge-web@${user} >>$log 2>&1
-                DWSALT=$(tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w 32 | head -n 1)
-                if $(command -v python2.7 >/dev/null 2>&1); then
-                    pythonversion=python2.7
-                elif $(command -v python3 >/dev/null 2>&1); then
-                    pythonversion=python3
-                fi
-                DWP=$(${pythonversion} /usr/local/bin/swizzin/deluge.Userpass.py ${pass} ${DWSALT})
-                sed -i "s/.*${user}.*/${user}:${pass}:10/" /home/$user/.config/deluge/auth
-                sed -i "s/.*pwd_salt.*/  \"pwd_salt\": \"${DWSALT}\",/" /home/$user/.config/deluge/web.conf
-                sed -i "s/.*pwd_sha1.*/  \"pwd_sha1\": \"${DWP}\",/" /home/$user/.config/deluge/web.conf
-                sed -i "/$user/{n;s/.*/      \"${pass}\"/}" /home/${user}/.config/deluge/hostlist.conf.1.2
-                systemctl start deluged@${user} >>$log 2>&1
-                systemctl start deluge-web@${user} >>$log 2>&1
-                ;;
-            lounge)
-                su -s /bin/sh lounge -c "thelounge reset $user " <<<"${pass}" >>$log 2>&1
-                ;;
-            mango)
-                if [[ -z $mangodir ]]; then mangodir="/opt/mango"; fi
-                su mango -c "$mangodir/mango admin user update ${user} -p ${pass}" >>$log 2>&1
-                ;;
-            organizr)
-                #TODO fix when API allows to
-                echo_warn "Remember to manually change the organizr account's password!"
-                ;;
-            qbittorrent)
-                . /etc/swizzin/sources/functions/qbittorrent
-                qbittorrent_chpasswd "${user}" "${pass}"
-                ;;
-            transmission)
-                systemctl stop transmission@${user} >>$log 2>&1
-                sed -i "s/.*rpc-password.*/  \"rpc-password\": \"${pass}\",/" /home/$user/.config/transmission-daemon/settings.json
-                systemctl start transmission@${user} >>$log 2>&1
-                ;;
-            *) ;;
+                autobrr)
+                    echo -n "$pass" | /usr/bin/autobrrctl --config "/home/$user/.config/autobrr" change-password "$user"
+                    ;;
+                deluge)
+                    systemctl stop deluged@${user} >> $log 2>&1
+                    systemctl stop deluge-web@${user} >> $log 2>&1
+                    DWSALT=$(tr -dc 'a-zA-Z0-9' < /dev/urandom | fold -w 32 | head -n 1)
+                    if $(command -v python2.7 > /dev/null 2>&1); then
+                        pythonversion=python2.7
+                    elif $(command -v python3 > /dev/null 2>&1); then
+                        pythonversion=python3
+                    fi
+                    DWP=$(${pythonversion} /usr/local/bin/swizzin/deluge.Userpass.py ${pass} ${DWSALT})
+                    sed -i "s/.*${user}.*/${user}:${pass}:10/" /home/$user/.config/deluge/auth
+                    sed -i "s/.*pwd_salt.*/  \"pwd_salt\": \"${DWSALT}\",/" /home/$user/.config/deluge/web.conf
+                    sed -i "s/.*pwd_sha1.*/  \"pwd_sha1\": \"${DWP}\",/" /home/$user/.config/deluge/web.conf
+                    sed -i "/$user/{n;s/.*/      \"${pass}\"/}" /home/${user}/.config/deluge/hostlist.conf.1.2
+                    systemctl start deluged@${user} >> $log 2>&1
+                    systemctl start deluge-web@${user} >> $log 2>&1
+                    ;;
+                lounge)
+                    su -s /bin/sh lounge -c "thelounge reset $user " <<< "${pass}" >> $log 2>&1
+                    ;;
+                mango)
+                    if [[ -z $mangodir ]]; then mangodir="/opt/mango"; fi
+                    su mango -c "$mangodir/mango admin user update ${user} -p ${pass}" >> $log 2>&1
+                    ;;
+                organizr)
+                    #TODO fix when API allows to
+                    echo_warn "Remember to manually change the organizr account's password!"
+                    ;;
+                qbittorrent)
+                    . /etc/swizzin/sources/functions/qbittorrent
+                    qbittorrent_chpasswd "${user}" "${pass}"
+                    ;;
+                transmission)
+                    systemctl stop transmission@${user} >> $log 2>&1
+                    sed -i "s/.*rpc-password.*/  \"rpc-password\": \"${pass}\",/" /home/$user/.config/transmission-daemon/settings.json
+                    systemctl start transmission@${user} >> $log 2>&1
+                    ;;
+                *) ;;
             esac
         fi
     done
@@ -521,7 +521,7 @@ function _gobrr() {
     apt_install --no-recommends mpv
     mpv --vo=tct --really-quiet https://media.tenor.co/videos/36c2c191bf4e05338e48c83a9a81ce35/mp4 --loop-file=2 &
     if [[ ! -f /install/.autobrr.lock ]]; then
-        bash /etc/swizzin/scripts/install/autobrr.sh >>${log} 2>&1
+        bash /etc/swizzin/scripts/install/autobrr.sh >> ${log} 2>&1
     fi
     wait
     echo_success "BOX WENT BRR"
@@ -566,7 +566,7 @@ _run_tests() {
 
 }
 
-branch_name="$(git -C /etc/swizzin symbolic-ref HEAD 2>/dev/null)" || branch_name="(unnamed branch)" # detached HEAD
+branch_name="$(git -C /etc/swizzin symbolic-ref HEAD 2> /dev/null)" || branch_name="(unnamed branch)" # detached HEAD
 branch_name=${branch_name##refs/heads/}
 
 if [[ $branch_name != 'master' ]]; then
@@ -586,96 +586,96 @@ elif [[ "$*" == *--test* ]]; then
 fi
 
 case "$1" in
-"")
-    _intro
-    _function
-    exit 0
-    ;;
-"help" | "-h")
-    _help "$0"
-    exit 0
-    ;;
-"install" | "it")
-    if [[ -z $2 ]]; then
-        echo_error "You must choose some packages"
+    "")
+        _intro
+        _function
+        exit 0
+        ;;
+    "help" | "-h")
+        _help "$0"
+        exit 0
+        ;;
+    "install" | "it")
+        if [[ -z $2 ]]; then
+            echo_error "You must choose some packages"
+            exit 1
+        fi
+        _cli "$@"
+        ;;
+    "remove" | "rm")
+        if [[ -z $2 ]]; then
+            echo_error "You must choose some packages"
+            exit 1
+        fi
+        _clr "$@"
+        ;;
+    "adduser")
+        if [[ -n $4 ]]; then
+            echo_error "Too many arguments\nCorrect usage: box adduser <username> [<password>]"
+            exit 1
+        fi
+        _adduser "$@"
+        ;;
+    "deluser")
+        if [[ -z $2 ]]; then
+            echo_error "You must specify a username.\nCorrect usage: box deluser <username>"
+            exit 1
+        fi
+        if [[ -n $3 ]]; then
+            echo_error "Too many arguments\nCorrect usage: box deluser <username>"
+            exit 1
+        fi
+        _deluser "$@"
+        ;;
+    "chpasswd")
+        if [[ -z $2 ]]; then
+            echo_error "You must specify a username.\nCorrect usage: box chpasswd <username> [<password>]"
+            exit 1
+        fi
+        if [[ -n $4 ]]; then
+            echo_error "Too many arguments\nCorrect usage: box chpasswd <username> [<password>]"
+            exit 1
+        fi
+        _chpasswd "$@"
+        ;;
+    "rmgrsec")
+        _nukeovh
+        exit 0
+        ;;
+    "rtx")
+        /usr/local/bin/swizzin/rtx
+        exit 0
+        ;;
+    "update")
+        _update "$2"
+        ;;
+    "upgrade")
+        if [[ $2 = "--dev" ]]; then
+            dev="--dev"
+            shift
+        fi
+        if [[ ! $2 ]]; then
+            echo_error "You must choose at least one package to update."
+            exit 1
+        fi
+        _update $dev
+        _upgrade "$@"
+        ;;
+    "list")
+        _list
+        exit 0
+        ;;
+    "test")
+        _run_tests "$@"
+        exit 0 # No need to double-run tests
+        ;;
+    "go")
+        _gobrr "$@"
+        ;;
+    *)
+        echo_error "Invalid command: $1"
         exit 1
-    fi
-    _cli "$@"
-    ;;
-"remove" | "rm")
-    if [[ -z $2 ]]; then
-        echo_error "You must choose some packages"
-        exit 1
-    fi
-    _clr "$@"
-    ;;
-"adduser")
-    if [[ -n $4 ]]; then
-        echo_error "Too many arguments\nCorrect usage: box adduser <username> [<password>]"
-        exit 1
-    fi
-    _adduser "$@"
-    ;;
-"deluser")
-    if [[ -z $2 ]]; then
-        echo_error "You must specify a username.\nCorrect usage: box deluser <username>"
-        exit 1
-    fi
-    if [[ -n $3 ]]; then
-        echo_error "Too many arguments\nCorrect usage: box deluser <username>"
-        exit 1
-    fi
-    _deluser "$@"
-    ;;
-"chpasswd")
-    if [[ -z $2 ]]; then
-        echo_error "You must specify a username.\nCorrect usage: box chpasswd <username> [<password>]"
-        exit 1
-    fi
-    if [[ -n $4 ]]; then
-        echo_error "Too many arguments\nCorrect usage: box chpasswd <username> [<password>]"
-        exit 1
-    fi
-    _chpasswd "$@"
-    ;;
-"rmgrsec")
-    _nukeovh
-    exit 0
-    ;;
-"rtx")
-    /usr/local/bin/swizzin/rtx
-    exit 0
-    ;;
-"update")
-    _update "$2"
-    ;;
-"upgrade")
-    if [[ $2 = "--dev" ]]; then
-        dev="--dev"
-        shift
-    fi
-    if [[ ! $2 ]]; then
-        echo_error "You must choose at least one package to update."
-        exit 1
-    fi
-    _update $dev
-    _upgrade "$@"
-    ;;
-"list")
-    _list
-    exit 0
-    ;;
-"test")
-    _run_tests "$@"
-    exit 0 # No need to double-run tests
-    ;;
-"go")
-    _gobrr "$@"
-    ;;
-*)
-    echo_error "Invalid command: $1"
-    exit 1
-    ;;
+        ;;
 esac
 
 if [[ $runtests == "true" ]]; then
