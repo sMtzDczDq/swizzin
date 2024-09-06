@@ -1,8 +1,9 @@
 #!/bin/bash
 # qBittorrent Installer for swizzin
 # Author: liara
-
 # Source the required functions
+#shellcheck source-path=sources/functions
+#shellcheck source=../../sources/functions/qbittorrent
 . /etc/swizzin/sources/functions/qbittorrent
 . /etc/swizzin/sources/functions/libtorrent
 . /etc/swizzin/sources/functions/utils

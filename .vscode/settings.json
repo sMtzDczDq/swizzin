@@ -37,5 +37,8 @@
         "swizdb",
         "shellcheck",
     ],
-    "conventionalCommits.promptFooter": false
+    "conventionalCommits.promptFooter": false,
+    "bashIde.shfmt.languageDialect": "bash",
+    "bashIde.includeAllWorkspaceSymbols": true,
+    "shellformat.useEditorConfig": true
 }
