@@ -30,18 +30,17 @@ case ${QBITTORRENT_VERSION} in
     install_fpm
     check_swap_on
 
-    if ! skip_libtorrent_qbittorrent; then
-        echo_progress_start "Building libtorrent-rasterbar"
-        build_libtorrent_qbittorrent
+        if ! skip_libtorrent_qbittorrent; then
+            echo_progress_start "Building libtorrent-rasterbar"
+            build_libtorrent_qbittorrent
+            echo_progress_done
+        fi
+        echo_progress_start "Building qBittorrent"
+        build_qbittorrent
+        cleanup_repo_libtorrent
         echo_progress_done
-    fi
-    install_qt
-    echo_progress_start "Building qBittorrent"
-    build_qbittorrent
-    cleanup_repo_libtorrent
-    echo_progress_done
-    check_swap_off
-    ;;
+        check_swap_off
+        ;;
 esac
 qbtvnew=$(qbittorrent-nox --version 2>/dev/null | grep -oP '\d+\.\d+\.\d+')
 
