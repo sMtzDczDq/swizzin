@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+    ],
+    "settings": {
+        "shellformat.flag": "-ci -sr -i 4 -ln bash",
+        "conventionalCommits.scopes": [
+            "ide",
+            "box",
+            "setup",
+            "apt",
+            "echos",
+            "swizdb",
+            "shellcheck"
+        ],
+        "conventionalCommits.promptFooter": false,
+        "bashIde.shfmt.languageDialect": "bash",
+        "bashIde.includeAllWorkspaceSymbols": true,
+        "shellformat.useEditorConfig": true,
+        "shellcheck.executablePath": "/opt/homebrew/bin/shellcheck"
+    }
+}
