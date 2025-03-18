@@ -19,6 +19,8 @@
         "bashIde.shfmt.languageDialect": "bash",
         "bashIde.includeAllWorkspaceSymbols": true,
         "shellformat.useEditorConfig": true,
-        "shellcheck.executablePath": "/opt/homebrew/bin/shellcheck"
+        "shellcheck.executablePath": "/opt/homebrew/bin/shellcheck",
+        "bashIde.shfmt.funcNextLine": true,
+        "bashIde.shellcheckPath": "/opt/homebrew/bin/shellcheck"
     }
 }
