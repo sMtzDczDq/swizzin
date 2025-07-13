@@ -13,7 +13,7 @@ function whiptail_qbittorrent() {
         latestv45=$(echo "$releases" | grep -m1 -oP '^4\.5\.\d?.?\d')
         latestv46=$(echo "$releases" | grep -m1 -oP '^4\.6\.\d?.?\d')
         latestv50=$(echo "$releases" | grep -m1 -oP '^5\.0\.\d?.?\d')
-        latestv=$(echo "$releases" | grep -m1 -oP '\d.\d?.?\d?.?\d')
+        #latestv=$(echo "$releases" | grep -m1 -oP '\d.\d?.?\d?.?\d')
         repov=$(get_candidate_version qbittorrent-nox)
         case ${codename} in
             "buster")
@@ -34,7 +34,7 @@ function whiptail_qbittorrent() {
                     "4.3" "(${latestv43})" \
                     "4.2" "(${latestv42})" \
                     "4.1" "(${latestv41})" 3>&1 1>&2 2>&3)
-                "Latest" "(${latestv})" 3>&1 1>&2 2>&3)
+                #"Latest" "(${latestv})" 3>&1 1>&2 2>&3)
                 ;;
             *)
                 function=$(
@@ -49,9 +49,9 @@ function whiptail_qbittorrent() {
                 ;;
         esac
         case $function in
-            Latest)
-            export QBITTORRENT_VERSION=${latestv}
-            ;;
+            #Latest)
+            #export QBITTORRENT_VERSION=${latestv}
+            #;;
             4.1)
                 export QBITTORRENT_VERSION=${latestv41}
                 ;;
