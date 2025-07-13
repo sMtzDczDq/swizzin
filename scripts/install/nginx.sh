@@ -23,28 +23,28 @@ if [[ -n $(pidof apache2) ]]; then
     fi
     if [[ $apache2 == "purge" ]]; then
         echo_progress_start "Purging apache2"
-        systemctl disable apache2 >>/dev/null 2>&1
+        systemctl disable apache2 >> /dev/null 2>&1
         systemctl stop apache2
         apt_remove --purge apache2
         echo_progress_done "Apache purged"
     elif [[ $apache2 == "disable" ]]; then
         echo_progress_start "Disabling apache2"
-        systemctl disable apache2 >>/dev/null 2>&1
+        systemctl disable apache2 >> /dev/null 2>&1
         systemctl stop apache2
         echo_progress_done "Apache disabled"
     fi
 fi
 
 case $codename in
-focal | buster | bullseye)
-    mcrypt=
-    geoip="php-geoip"
-    ;;
-*)
-    mcrypt=
-    geoip=
+    focal | buster | bullseye)
+        mcrypt=
+        geoip="php-geoip"
+        ;;
+    *)
+        mcrypt=
+        geoip=
 
-    ;;
+        ;;
 esac
 
 # Prepare the /etc/nginx/ssl/ for openssl dhparm generation
@@ -59,10 +59,10 @@ rm_if_exists $templog
 touch $templog
 
 # Start openssl dhparam as a background task using temp.log
-openssl dhparam -out dhparam.pem 2048 >>$templog 2>&1 &
+openssl dhparam -out dhparam.pem 2048 >> $templog 2>&1 &
 
 # Install packages for nginx in the foreground
-APT="nginx subversion ssl-cert php-fpm libfcgi0ldbl php-cli php-dev php-xml php-curl php-xmlrpc php-json php-mbstring php-opcache php-zip ${geoip} ${mcrypt}"
+APT="nginx libnginx-mod-http-fancyindex subversion ssl-cert php-fpm libfcgi0ldbl php-cli php-dev php-xml php-curl php-xmlrpc php-json php-mbstring php-opcache php-zip ${geoip} ${mcrypt}"
 apt_install $APT
 
 # Wait for the background task of openssl dhparm generation to finish
@@ -70,7 +70,7 @@ wait
 
 # Append the results of temp.log to swizzin.log and remove temp.log
 echo_log_only "Begin of OpenSSL dhparm results"
-cat $templog >>$log 2>&1
+cat $templog >> $log 2>&1
 echo_log_only "End of OpenSSL dhparm results"
 rm_if_exists $templog
 
@@ -107,7 +107,7 @@ echo_info "Using ${sock} in the nginx config"
 rm -rf /etc/nginx/sites-enabled/default
 
 echo_progress_start "Creating default nginx site config and certificates"
-cat >/etc/nginx/sites-enabled/default <<NGC
+cat > /etc/nginx/sites-enabled/default << NGC
 server {
   listen 80 default_server;
   listen [::]:80 default_server;
@@ -149,7 +149,7 @@ NGC
 mkdir -p /etc/nginx/snippets/
 mkdir -p /etc/nginx/apps/
 
-cat >/etc/nginx/snippets/ssl-params.conf <<SSC
+cat > /etc/nginx/snippets/ssl-params.conf << SSC
 ssl_protocols TLSv1.2 TLSv1.3;
 ssl_prefer_server_ciphers on;
 ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:EECDH+AESGCM:EDH+AESGCM;
@@ -170,7 +170,7 @@ add_header X-Content-Type-Options nosniff;
 ssl_dhparam /etc/nginx/ssl/dhparam.pem;
 SSC
 
-cat >/etc/nginx/snippets/proxy.conf <<PROX
+cat > /etc/nginx/snippets/proxy.conf << PROX
 client_max_body_size 10m;
 client_body_buffer_size 128k;
 
@@ -198,11 +198,11 @@ PROX
 echo_progress_done "Config installed"
 
 echo_progress_start "Installing fancyindex"
-git clone https://github.com/Naereen/Nginx-Fancyindex-Theme/ /tmp/fancyindex >>$log 2>&1
-mv /tmp/fancyindex/Nginx-Fancyindex-Theme-dark /srv/fancyindex >>$log 2>&1
+git clone https://github.com/Naereen/Nginx-Fancyindex-Theme/ /tmp/fancyindex >> $log 2>&1
+mv /tmp/fancyindex/Nginx-Fancyindex-Theme-dark /srv/fancyindex >> $log 2>&1
 rm -rf /tmp/fancyindex
 
-cat >/etc/nginx/snippets/fancyindex.conf <<FIC
+cat > /etc/nginx/snippets/fancyindex.conf << FIC
 fancyindex on;
 fancyindex_localtime on;
 fancyindex_exact_size off;
@@ -216,7 +216,7 @@ sed -i 's/href="\/[^\/]*/href="\/fancyindex/g' /srv/fancyindex/header.html
 sed -i 's/src="\/[^\/]*/src="\/fancyindex/g' /srv/fancyindex/footer.html
 
 #Some ruTorrent plugins need to bypass htpasswd, so we stuff the php for this here
-cat >/etc/nginx/apps/fancyindex.conf <<FIAC
+cat > /etc/nginx/apps/fancyindex.conf << FIAC
 location /fancyindex {
     location ~ \.php($|/) {
         fastcgi_split_path_info ^(.+?\.php)(/.+)$;
