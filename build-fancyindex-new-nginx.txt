@@ -1,0 +1,3 @@
+git clone https://github.com/nginx/pkg-oss.git
+cd pkg-oss
+./build_module.sh https://github.com/aperezdc/ngx-fancyindex.git
