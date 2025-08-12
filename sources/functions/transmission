@@ -13,7 +13,7 @@ function _get_next_port_from_json() {
         confpath="${d}${relpath}"
         if [[ -f $confpath ]]; then
             paramrr=".[\"$key\"]"
-            value=$(jq -r "$paramrr" <"$confpath")
+            value=$(jq -r "$paramrr" < "$confpath")
         fi
         if [[ -n $value ]]; then
             if [[ $value -ge $highestvalue ]]; then
@@ -56,12 +56,12 @@ function _install_transmission() {
             return 1
         else
             echo_progress_start "Adding Transmission PPA"
-            add-apt-repository ppa:transmissionbt/ppa -y >>"$log" 2>&1
-            echo_progress_done "PPA Added"
+            add-apt-repository ppa:transmissionbt/ppa -y >> "$log" 2>&1
+            echo_progress_done "PPA Added"ma
         fi
     fi
     apt_install transmission-cli transmission-common transmission-daemon
     echo_progress_start "Disabling default non-multiuser service"
-    systemctl disable -q --now transmission-daemon >>"$log" 2>&1
+    systemctl disable -q --now transmission-daemon >> "$log" 2>&1
     echo_progress_done
 }

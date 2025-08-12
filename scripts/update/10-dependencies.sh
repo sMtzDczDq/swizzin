@@ -1,15 +1,20 @@
 #!/bin/bash
 # Ensures that dependencies are installed and corrects them if that is not the case.
 
-if ! which add-apt-repository >/dev/null; then
-    apt_install software-properties-common # Ubuntu may require universe/mutliverse enabled for certain packages so we must ensure repos are enabled before deps are attempted to installed
+if ! which add-apt-repository > /dev/null; then
+    if [[ $(_os_codename) == "trixie" ]]; then
+        wget --quiet https://archive.ubuntu.com/ubuntu/pool/main/s/software-properties/python3-software-properties_0.111_all.deb https://archive.ubuntu.com/ubuntu/pool/main/s/software-properties/software-properties-common_0.111_all.deb
+        sudo apt install ./python3-software-properties_0.111_all.deb ./software-properties-common_0.111_all.deb
+    else
+        apt_install software-properties-common # Ubuntu may require universe/mutliverse enabled for certain packages so we must ensure repos are enabled before deps are attempted to installed
+    fi
 fi
 
 if [[ $(_os_distro) == "ubuntu" ]]; then
     if [[ $(_os_codename) == "jammy" ]]; then
-        if ! grep -s 'ubuntu-toolchain-r' /etc/apt/sources.list.d/ubuntu-toolchain-r-ubuntu-ppa-jammy.list 2>/dev/null | grep -q -v '^#'; then
+        if ! grep -s 'ubuntu-toolchain-r' /etc/apt/sources.list.d/ubuntu-toolchain-r-ubuntu-ppa-jammy.list 2> /dev/null | grep -q -v '^#'; then
             echo_info "Adding toolchain repo"
-            add-apt-repository -y ppa:ubuntu-toolchain-r/ppa >>${log} 2>&1
+            add-apt-repository -y ppa:ubuntu-toolchain-r/ppa >> ${log} 2>&1
             trigger_apt_update=true
         fi
     fi
