@@ -28,10 +28,10 @@ touch $log
 # Setting up /etc/swizzin
 #shellcheck disable=SC2120
 function _source_setup() {
-    echo -e "...\tInstalling git"     # The one true dependency
-    apt-get update -q >>$log 2>&1     # Force update just in case sources were never pulled
-    apt-get install git -y -qq >>$log # DO NOT PUT MORE DEPENDENCIES HERE
-    echo -e "\tGit Installed"         # All dependencies go to scripts/update/10-dependencies.sh
+    echo -e "...\tInstalling git"      # The one true dependency
+    apt-get update -q >> $log 2>&1     # Force update just in case sources were never pulled
+    apt-get install git -y -qq >> $log # DO NOT PUT MORE DEPENDENCIES HERE
+    echo -e "\tGit Installed"          # All dependencies go to scripts/update/10-dependencies.sh
 
     if [[ "$*" =~ '--local' ]]; then
         RelativeScriptPath=$(dirname "${BASH_SOURCE[0]}")
@@ -45,7 +45,7 @@ function _source_setup() {
         echo "Best of luck and please follow the contribution guidelines cheerio"
     else
         echo -e "...\tCloning swizzin repo to localhost"
-        git clone https://github.com/swizzin/swizzin.git /etc/swizzin >>${log} 2>&1
+        git clone https://github.com/swizzin/swizzin.git /etc/swizzin >> ${log} 2>&1
         echo -e "\tSwizzin cloned!"
     fi
 
@@ -173,11 +173,11 @@ function _option_parse() {
         for i in "${installArray[@]}"; do
             #shellcheck disable=SC2199,SC2076
             if [[ " ${priority[@]} " =~ " ${i} " ]]; then
-                echo "$i" >>/root/results
+                echo "$i" >> /root/results
                 echo_log_only "$i added to install queue 1"
                 touch /tmp/."$i".lock
             else
-                echo "$i" >>/root/results2
+                echo "$i" >> /root/results2
                 echo_log_only "$i added to install queue 2"
             fi
         done
@@ -188,9 +188,9 @@ _option_parse "$@"
 _os() {
     if [ ! -d /install ]; then mkdir /install; fi
     if [ ! -d /root/logs ]; then mkdir /root/logs; fi
-    if ! which lsb_release >/dev/null; then
-        echo -e "...\tInstalling lsb-release"     # Okay MAYBE there's one more depend until we gut this app in favour of /etc/os-release
-        apt-get install lsb-release -y -qq >>$log # DO NOT PUT MORE DEPENDENCIES HERE
+    if ! which lsb_release > /dev/null; then
+        echo -e "...\tInstalling lsb-release"      # Okay MAYBE there's one more depend until we gut this app in favour of /etc/os-release
+        apt-get install lsb-release -y -qq >> $log # DO NOT PUT MORE DEPENDENCIES HERE
     fi
     distribution=$(lsb_release -is)
     codename=$(lsb_release -cs)
@@ -198,7 +198,7 @@ _os() {
         echo_error "Your distribution ($distribution) is not supported. Swizzin requires Ubuntu or Debian."
         exit 1
     fi
-    if [[ ! $codename =~ ^(focal|bullseye|jammy|bookworm|noble)$ ]]; then
+    if [[ ! $codename =~ ^(focal|bullseye|jammy|bookworm|noble|trixie)$ ]]; then
         echo_error "Your release ($codename) of $distribution is not supported."
         exit 1
     fi
@@ -206,7 +206,7 @@ _os() {
 
 function _preparation() {
     echo_info "Preparing system"
-    apt-get install uuid-runtime -yy >>$log 2>&1
+    apt-get install uuid-runtime -yy >> $log 2>&1
     apt_update # Do this because sometimes the system install is so fresh it's got a good stam but it is "empty"
     apt_upgrade
 
@@ -216,7 +216,7 @@ function _preparation() {
     fi
 
     nofile=$(grep "DefaultLimitNOFILE=500000" /etc/systemd/system.conf)
-    if [[ ! "$nofile" ]]; then echo "DefaultLimitNOFILE=500000" >>/etc/systemd/system.conf; fi
+    if [[ ! "$nofile" ]]; then echo "DefaultLimitNOFILE=500000" >> /etc/systemd/system.conf; fi
     echo_progress_done "Setup succesful"
     echo
 }
@@ -254,7 +254,7 @@ function _choices() {
             packages+=("$i" '""')
         fi
     done
-    whiptail --title "Install Software" --checklist --noitem --separate-output "Choose your clients and core features." 15 26 7 "${packages[@]}" 2>/root/results || exit 1
+    whiptail --title "Install Software" --checklist --noitem --separate-output "Choose your clients and core features." 15 26 7 "${packages[@]}" 2> /root/results || exit 1
     results=/root/results
     if grep -q rtorrent "$results"; then
         gui=(rutorrent flood)
@@ -264,8 +264,8 @@ function _choices() {
                 guis+=("$i" '""')
             fi
         done
-        whiptail --title "rTorrent GUI" --checklist --noitem --separate-output "Optional: Select a GUI for rtorrent" 15 26 7 "${guis[@]}" 2>/root/guis || exit 1
-        readarray -t guis </root/guis
+        whiptail --title "rTorrent GUI" --checklist --noitem --separate-output "Optional: Select a GUI for rtorrent" 15 26 7 "${guis[@]}" 2> /root/guis || exit 1
+        readarray -t guis < /root/guis
         for gui in "${guis[@]}"; do
             sed -i "/rtorrent/a $gui" /root/results
         done
@@ -273,7 +273,7 @@ function _choices() {
     fi
     while IFS= read -r result; do
         touch /tmp/.$result.lock
-    done <"$results"
+    done < "$results"
 
     locksextra=($(find /usr/local/bin/swizzin/install -type f -printf "%f\n" | cut -d "." -f 1 | sort -d))
     for i in "${locksextra[@]}"; do
@@ -282,7 +282,7 @@ function _choices() {
             extras+=("$i" '""')
         fi
     done
-    whiptail --title "Install Software" --checklist --noitem --separate-output "Make some more choices ^.^ Or don't. idgaf" 15 26 7 "${extras[@]}" 2>/root/results2 || exit 1
+    whiptail --title "Install Software" --checklist --noitem --separate-output "Make some more choices ^.^ Or don't. idgaf" 15 26 7 "${extras[@]}" 2> /root/results2 || exit 1
 }
 
 function _check_results() {
@@ -327,7 +327,7 @@ function _check_results() {
 function _prioritize_results() {
     if grep -q nginx "$results"; then
         sed -i '/nginx/d' /root/results
-        echo "" >>/root/results
+        echo "" >> /root/results
         sed -i '1s/^/nginx\n/' /root/results
     fi
 }
@@ -335,11 +335,11 @@ function _prioritize_results() {
 function _install() {
     begin=$(date +"%s")
     if [[ -s /root/results ]]; then
-        bash /etc/swizzin/scripts/box install $(</root/results) && rm /root/results
+        bash /etc/swizzin/scripts/box install $(< /root/results) && rm /root/results
         showTimer=true
     fi
     if [[ -s /root/results2 ]]; then
-        bash /etc/swizzin/scripts/box install $(</root/results2) && rm /root/results2
+        bash /etc/swizzin/scripts/box install $(< /root/results2) && rm /root/results2
         showTimer=true
     fi
     termin=$(date +"%s")
@@ -355,13 +355,13 @@ function _post() {
 
     ip=$(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')
     if ! grep -q -ow '^export PATH=$PATH:/usr/local/bin/swizzin$' ~/.bashrc; then
-        echo "export PATH=\$PATH:/usr/local/bin/swizzin" >>/root/.bashrc
+        echo "export PATH=\$PATH:/usr/local/bin/swizzin" >> /root/.bashrc
     fi
     #echo "export PATH=\$PATH:/usr/local/bin/swizzin" >> /home/$user/.bashrc
     #chown ${user}: /home/$user/.profile
-    echo "Defaults    secure_path = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin/swizzin" >/etc/sudoers.d/secure_path
+    echo "Defaults    secure_path = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin/swizzin" > /etc/sudoers.d/secure_path
     if [[ $distribution = "Ubuntu" ]]; then
-        echo 'Defaults  env_keep -="HOME"' >/etc/sudoers.d/env_keep
+        echo 'Defaults  env_keep -="HOME"' > /etc/sudoers.d/env_keep
     fi
 
     ring_the_bell
