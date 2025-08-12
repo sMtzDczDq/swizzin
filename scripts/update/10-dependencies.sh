@@ -4,7 +4,7 @@
 if ! which add-apt-repository > /dev/null; then
     if [[ $(_os_codename) == "trixie" ]]; then
         wget --quiet https://archive.ubuntu.com/ubuntu/pool/main/s/software-properties/python3-software-properties_0.111_all.deb https://archive.ubuntu.com/ubuntu/pool/main/s/software-properties/software-properties-common_0.111_all.deb
-        sudo apt install ./python3-software-properties_0.111_all.deb ./software-properties-common_0.111_all.deb
+        sudo apt install -y ./python3-software-properties_0.111_all.deb ./software-properties-common_0.111_all.deb
     else
         apt_install software-properties-common # Ubuntu may require universe/mutliverse enabled for certain packages so we must ensure repos are enabled before deps are attempted to installed
     fi
