@@ -9,7 +9,6 @@
         "swizzin",
         "xenial"
     ],
-    "shellformat.flag": "-ci -sr -i 4 -ln bash",
     "editor.detectIndentation": false,
     "editor.formatOnSave": true,
     "editor.formatOnPaste": true,
@@ -38,7 +37,10 @@
         "shellcheck",
     ],
     "conventionalCommits.promptFooter": false,
-    "bashIde.shfmt.languageDialect": "bash",
-    "bashIde.includeAllWorkspaceSymbols": true,
-    "shellformat.useEditorConfig": true
+    "shellformat.useEditorConfig": true,
+    "bashIde.enableSourceErrorDiagnostics": true,
+    "bashIde.shfmt.path": "",
+    "[shellscript]": {
+        "editor.defaultFormatter": "mkhl.shfmt"
+    }
 }

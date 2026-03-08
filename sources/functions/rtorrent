@@ -60,7 +60,7 @@ function set_rtorrent_version() {
             export rtorrentver='0.15.3'
             export libtorrentver='0.15.3'
             ;;
-			
+
         0.15.5 | '0.15.5')
             export rtorrentver='0.15.5'
             export libtorrentver='0.15.5'
@@ -130,7 +130,7 @@ function depends_rtorrent() {
     rm -rf mktorrent*
 }
 
-function build_xmlrpc-c() {    
+function build_xmlrpc-c() {
     if [[ ! ${rtorrentver} == "0.15.1" && ! ${rtorrentver} == "0.15.3" && ! ${rtorrentver} == "0.15.5" ]]; then
         build_xmlrpc-c_old
     fi
@@ -176,7 +176,7 @@ function build_libtorrent_rakshasa_new() {
     . /etc/swizzin/sources/functions/utils
     download_libtorrent_rakshasa
     auto_patch_libtorrent_rakshasa
-	
+
     if [[ ${libtorrentver} == "0.15.3" ]]; then
         patch -p1 < /etc/swizzin/sources/patches/rtorrent/libtorrent-0.15.3-resume-fix.patch >> "$log" 2>&1
     fi

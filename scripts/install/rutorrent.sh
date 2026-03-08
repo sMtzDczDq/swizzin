@@ -18,16 +18,9 @@ bash /usr/local/bin/swizzin/nginx/rutorrent.sh || {
 
 if [[ ! -f /install.ffmpeg.lock ]]; then
     echo_progress_start "Installing ffmpeg for ruTorrent"
+    #shellcheck source=sources/functions/ffmpeg
     . /etc/swizzin/sources/functions/ffmpeg
     ffmpeg_install
-fi
-
-if [[ -f /install/.autodl.lock ]]; then
-    echo_progress_start "Configuring Autodl Plugin"
-    bash /usr/local/bin/swizzin/nginx/autodl.sh || {
-        echo_error "Autodl plugin config failed."
-    }
-    echo_progress_done "Autodl Plugin Configured"
 fi
 
 systemctl reload nginx
