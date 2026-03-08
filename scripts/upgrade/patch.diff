@@ -1,0 +1,504 @@
+diff airsonic.sh.orig airsonic.sh
+--- airsonic.sh.orig
++++ airsonic.sh
+@@ -13,7 +13,7 @@
+ echo_progress_start "Downloading airsonic binary"
+ dlurl=$(curl -s https://api.github.com/repos/airsonic/airsonic/releases/latest | grep "browser_download_url" | grep "airsonic.war" | head -1 | cut -d\" -f 4)
+ echo_log_only "dlurl = $dlurl"
+-if ! wget "$dlurl" -O /tmp/airsonic.war >>"$log" 2>&1; then
++if ! wget "$dlurl" -O /tmp/airsonic.war >> "$log" 2>&1; then
+     echo_error "Download failed!"
+     exit 1
+ fi
+diff autodl.sh.orig autodl.sh
+--- autodl.sh.orig
++++ autodl.sh
+@@ -5,7 +5,7 @@
+ readarray -t users < <(_get_user_list)
+ 
+ echo_progress_start "Downloading autodl-irssi latest release"
+-wget -q "$(curl -sL http://git.io/vlcND | jq .assets[0].browser_download_url -r)" -O /tmp/autodl-irssi.zip >>$log 2>&1 || {
++wget -q "$(curl -sL http://git.io/vlcND | jq .assets[0].browser_download_url -r)" -O /tmp/autodl-irssi.zip >> $log 2>&1 || {
+     echo_error "Autodl download failed, please check the log"
+     exit 1
+ }
+@@ -16,7 +16,7 @@
+     echo_log_only "Extracting for user $u"
+     irssipath="/home/${u}/.irssi/scripts"
+     rm -rf "$irssipath"/{AutodlIrssi,autodl-irssi.pl,autorun/autodl-irssi.pl}
+-    unzip -o /tmp/autodl-irssi.zip -d "$irssipath" >>"${log}" 2>&1
++    unzip -o /tmp/autodl-irssi.zip -d "$irssipath" >> "${log}" 2>&1
+     cp "$irssipath"/autodl-irssi.pl "$irssipath"/autorun/
+     chown -R "$u": /home/"${u}"/.irssi/
+ done
+diff calibre.sh.orig calibre.sh
+--- calibre.sh.orig
++++ calibre.sh
+@@ -8,15 +8,15 @@
+ if ! check_installed libopengl0; then apt_install libopengl0; fi
+ 
+ case "$(_os_arch)" in
+-amd64)
+-    wget https://download.calibre-ebook.com/linux-installer.sh -O /tmp/calibre-installer.sh >>$log 2>&1
+-    if ! bash /tmp/calibre-installer.sh install_dir=/opt >>$log 2>&1; then
+-        echo_error "failed to upgrade calibre"
+-        exit 1
+-    fi
+-    ;;
+-*)
+-    # echo_info "No upgrader yet! Your installation is currently managed by apt. Please use that in the meantime"
+-    apt_install --only-upgrade calibre
+-    ;;
++    amd64)
++        wget https://download.calibre-ebook.com/linux-installer.sh -O /tmp/calibre-installer.sh >> $log 2>&1
++        if ! bash /tmp/calibre-installer.sh install_dir=/opt >> $log 2>&1; then
++            echo_error "failed to upgrade calibre"
++            exit 1
++        fi
++        ;;
++    *)
++        # echo_info "No upgrader yet! Your installation is currently managed by apt. Please use that in the meantime"
++        apt_install --only-upgrade calibre
++        ;;
+ esac
+diff deluge.sh.orig deluge.sh
+--- deluge.sh.orig
++++ deluge.sh
+@@ -18,41 +18,41 @@
+ whiptail_deluge
+ 
+ case ${DELUGE_VERSION} in
+-[Rr][Ee][Pp][Oo])
+-    check_shared_libtorrent_rasterbar deluge
+-    apt_install_deluge
+-    ;;
+-*)
+-    detect_libtorrent_rasterbar_conflict deluge
+-    whiptail_deluge_downupgrade
+-    deluge_version_info
+-    dver=$(deluged -v | grep deluged | grep -oP '\d+\.\d+\.\d+')
+-    users=($(_get_user_list))
+-    if [[ $dver == 1.3* ]] && [[ $DELUGE_VERSION == master ]]; then
+-        echo_info "Major version upgrade detected. User-data will be backed-up."
+-        for u in "${users[@]}"; do
+-            echo_info "'/home/${u}/.config/deluge' -> '/home/$u/.config/deluge.$$'"
+-            cp -a /home/${u}/.config/deluge /home/${u}/.config/deluge.$$
+-
+-        done
+-    fi
+-    echo_progress_start "Checking for outdated deluge install method."
+-    remove_ltcheckinstall
+-
+-    install_fpm
+-    if ! skip_libtorrent_deluge; then
+-        check_swap_on
+-        echo_progress_start "Rebuilding libtorrent"
+-        build_libtorrent_deluge
+-        check_swap_off
++    [Rr][Ee][Pp][Oo])
++        check_shared_libtorrent_rasterbar deluge
++        apt_install_deluge
++        ;;
++    *)
++        detect_libtorrent_rasterbar_conflict deluge
++        whiptail_deluge_downupgrade
++        deluge_version_info
++        dver=$(deluged -v | grep deluged | grep -oP '\d+\.\d+\.\d+')
++        users=($(_get_user_list))
++        if [[ $dver == 1.3* ]] && [[ $DELUGE_VERSION == master ]]; then
++            echo_info "Major version upgrade detected. User-data will be backed-up."
++            for u in "${users[@]}"; do
++                echo_info "'/home/${u}/.config/deluge' -> '/home/$u/.config/deluge.$$'"
++                cp -a /home/${u}/.config/deluge /home/${u}/.config/deluge.$$
++
++            done
++        fi
++        echo_progress_start "Checking for outdated deluge install method."
++        remove_ltcheckinstall
++
++        install_fpm
++        if ! skip_libtorrent_deluge; then
++            check_swap_on
++            echo_progress_start "Rebuilding libtorrent"
++            build_libtorrent_deluge
++            check_swap_off
++            echo_progress_done
++        fi
++        cleanup_deluge
++        echo_progress_start "Upgrading Deluge. Please wait"
++        build_deluge
++        cleanup_repo_libtorrent
+         echo_progress_done
+-    fi
+-    cleanup_deluge
+-    echo_progress_start "Upgrading Deluge. Please wait"
+-    build_deluge
+-    cleanup_repo_libtorrent
+-    echo_progress_done
+-    ;;
++        ;;
+ esac
+ 
+ if [[ -f /install/.nginx.lock ]]; then
+diff emby.sh.orig emby.sh
+--- emby.sh.orig
++++ emby.sh
+@@ -8,11 +8,11 @@
+ 
+ if dpkg --compare-versions ${latest} gt ${current}; then
+     echo_info "Upgrading Emby"
+-    wget -O /tmp/emby.dpkg https://github.com/MediaBrowser/Emby.Releases/releases/download/${latest}/emby-server-deb_${latest}_$(_os_arch).deb >>$log 2>&1 || {
++    wget -O /tmp/emby.dpkg https://github.com/MediaBrowser/Emby.Releases/releases/download/${latest}/emby-server-deb_${latest}_$(_os_arch).deb >> $log 2>&1 || {
+         echo_error "Emby failed to download"
+         exit 1
+     }
+-    dpkg -i /tmp/emby.dpkg >>${log} 2>&1 || {
++    dpkg -i /tmp/emby.dpkg >> ${log} 2>&1 || {
+         echo_error "Emby failed to install"
+     }
+     rm /tmp/emby.dpkg
+diff filebrowser.sh.orig filebrowser.sh
+--- filebrowser.sh.orig
++++ filebrowser.sh
+@@ -12,24 +12,24 @@
+ mv /home/${username}/bin/filebrowser /home/${username}/bin/filebrowser.bak
+ 
+ case "$(_os_arch)" in
+-"amd64" | "arm64")
+-    fb_arch="$(_os_arch)"
+-    ;;
+-"armhf")
+-    fb_arch="(uname -r)"
+-    ;;
+-*)
+-    echo_error "$(_os_arch) not supported by filebrowser"
+-    exit 1
+-    ;;
++    "amd64" | "arm64")
++        fb_arch="$(_os_arch)"
++        ;;
++    "armhf")
++        fb_arch="(uname -r)"
++        ;;
++    *)
++        echo_error "$(_os_arch) not supported by filebrowser"
++        exit 1
++        ;;
+ esac
+ 
+ dlurl="$(curl -sNL https://api.github.com/repos/filebrowser/filebrowser/releases/latest | jq -r '.assets[]?.browser_download_url' | grep linux-"${fb_arch}")"
+-wget -O "/home/${username}/filebrowser.tar.gz" "$dlurl" >>$log 2>&1 || {
++wget -O "/home/${username}/filebrowser.tar.gz" "$dlurl" >> $log 2>&1 || {
+     echo_error "Failed to download archive"
+     exit 1
+ }
+-tar -xvzf "/home/${username}/filebrowser.tar.gz" --exclude LICENSE --exclude README.md -C "/home/${username}/bin" >>$log 2>&1 || {
++tar -xvzf "/home/${username}/filebrowser.tar.gz" --exclude LICENSE --exclude README.md -C "/home/${username}/bin" >> $log 2>&1 || {
+     echo_error "Failed to extract downloaded file"
+     exit 1
+ }
+diff flood.sh.orig flood.sh
+--- flood.sh.orig
++++ flood.sh
+@@ -10,7 +10,7 @@
+ fi
+ 
+ echo_progress_start "Upgrading flood"
+-npm install -g flood >>${log} 2>&1
++npm install -g flood >> ${log} 2>&1
+ echo_progress_done
+ 
+ for user in "${users[@]}"; do
+diff mango.sh.orig mango.sh
+--- mango.sh.orig
++++ mango.sh
+@@ -27,7 +27,7 @@
+     echo_error "Failed to query github"
+     exit 1
+ fi
+-wget "${dlurl}" -O $mangodir/mango >>$log 2>&1
++wget "${dlurl}" -O $mangodir/mango >> $log 2>&1
+ chmod +x "$mangodir"/mango
+ echo_progress_done
+ 
+diff nzbhydra.sh.orig nzbhydra.sh
+--- nzbhydra.sh.orig
++++ nzbhydra.sh
+@@ -9,16 +9,16 @@
+     echo_query "NZBHydra v1 detected. Do you want to migrate data?\nIf you select no, a migration will not be attempted but your old data will be left." ""
+     select yn in "Yes" "No"; do
+         case $yn in
+-        Yes)
+-            migrate=True
+-            majorupgrade=True
+-            break
+-            ;;
+-        No)
+-            migrate=False
+-            majorupgrade=True
+-            break
+-            ;;
++            Yes)
++                migrate=True
++                majorupgrade=True
++                break
++                ;;
++            No)
++                migrate=False
++                majorupgrade=True
++                break
++                ;;
+         esac
+     done
+     if [[ $migrate == True ]]; then
+@@ -25,14 +25,14 @@
+         echo_query "Do you wish to migrate your old database? If you select no, only settings will be transferred." ""
+         select yn in "Yes" "No"; do
+             case $yn in
+-            Yes)
+-                database=true
+-                break
+-                ;;
+-            No)
+-                database=false
+-                break
+-                ;;
++                Yes)
++                    database=true
++                    break
++                    ;;
++                No)
++                    database=false
++                    break
++                    ;;
+             esac
+         done
+         oldport=$(grep \"port\" /home/${username}/.config/nzbhydra/settings.cfg | grep -oP '\d+')
+@@ -54,7 +54,7 @@
+ LIST='default-jre-headless unzip jq'
+ apt_install $LIST
+ 
+-if ! dpkg -s jq >/dev/null 2>&1; then
++if ! dpkg -s jq > /dev/null 2>&1; then
+     echo_error "jq did not get installed. This is likely an error which will go away if you rerun this function."
+     exit 1
+ fi
+@@ -64,8 +64,8 @@
+     cd /opt
+     mkdir nzbhydra2
+     cd nzbhydra2
+-    wget -O nzbhydra2.zip https://github.com/theotherp/nzbhydra2/releases/download/v${version}/nzbhydra2-${version}-linux.zip >>${log} 2>&1
+-    unzip nzbhydra2.zip >>${log} 2>&1
++    wget -O nzbhydra2.zip https://github.com/theotherp/nzbhydra2/releases/download/v${version}/nzbhydra2-${version}-linux.zip >> ${log} 2>&1
++    unzip nzbhydra2.zip >> ${log} 2>&1
+     chmod +x nzbhydra2
+     rm -f nzbhydra2.zip
+     chown -R ${username}: /opt/nzbhydra2
+@@ -99,11 +99,11 @@
+         cd /opt
+         rm -rf nzbhydra2
+         rm -rf /home/${username}/.config/nzbhydra2
+-        killall nzbhydra2 >>${log} 2>&1
++        killall nzbhydra2 >> ${log} 2>&1
+         exit 1
+     fi
+ 
+-    killall nzbhydra2 >>${log} 2>&1
++    killall nzbhydra2 >> ${log} 2>&1
+     sleep 10
+     echo_progress_done "Migration complete"
+     echo_query "Press enter to continue setting up NZBHydra2" "enter"
+@@ -116,7 +116,7 @@
+     rm_if_exists /etc/nginx/apps/nzbhydra.conf
+     rm_if_exists /opt/.venv/nzbhydra
+     rm_if_exists /opt/nzbhydra
+-    cat >/etc/systemd/system/nzbhydra.service <<EOH2
++    cat > /etc/systemd/system/nzbhydra.service << EOH2
+ [Unit]
+ Description=NZBHydra2 Daemon
+ Documentation=https://github.com/theotherp/nzbhydra2
+@@ -147,7 +147,7 @@
+     echo_progress_done "Systemd files reconfigured"
+ fi
+ 
+-localversion=$(/opt/nzbhydra2/nzbhydra2 --version 2>/dev/null | grep -oP 'v\d+\.\d+\.\d+')
++localversion=$(/opt/nzbhydra2/nzbhydra2 --version 2> /dev/null | grep -oP 'v\d+\.\d+\.\d+')
+ latest=$(curl -s https://api.github.com/repos/theotherp/nzbhydra2/releases/latest | grep -E "browser_download_url" | grep linux | head -1 | cut -d\" -f 4)
+ latestversion=$(echo $latest | grep -oP 'v\d+\.\d+\.\d+')
+ if [[ -z $localversion ]] || dpkg --compare-versions ${localversion#v} lt ${latestversion#v}; then
+@@ -156,8 +156,8 @@
+     rm_if_exists /opt/nzbhydra2
+     mkdir nzbhydra2
+     cd nzbhydra2
+-    wget -O nzbhydra2.zip ${latest} >>${log} 2>&1
+-    unzip nzbhydra2.zip >>${log} 2>&1
++    wget -O nzbhydra2.zip ${latest} >> ${log} 2>&1
++    unzip nzbhydra2.zip >> ${log} 2>&1
+     rm -f nzbhydra2.zip
+ 
+     chmod +x nzbhydra2 nzbhydra2wrapperPy3.py
+diff ombi.sh.orig ombi.sh
+--- ombi.sh.orig
++++ ombi.sh
+@@ -7,8 +7,8 @@
+ if ! grep -q apt.ombi.app /etc/apt/sources.list.d/ombi.list; then
+ 
+     echo_info "Upgrading ombi apt sources"
+-    curl -sSL https://apt.ombi.app/pub.key | gpg --dearmor >/usr/share/keyrings/ombi-archive-keyring.gpg 2>>"${log}"
+-    echo "deb [signed-by=/usr/share/keyrings/ombi-archive-keyring.gpg] https://apt.ombi.app/master jessie main" >/etc/apt/sources.list.d/ombi.list
++    curl -sSL https://apt.ombi.app/pub.key | gpg --dearmor > /usr/share/keyrings/ombi-archive-keyring.gpg 2>> "${log}"
++    echo "deb [signed-by=/usr/share/keyrings/ombi-archive-keyring.gpg] https://apt.ombi.app/master jessie main" > /etc/apt/sources.list.d/ombi.list
+ 
+     echo_progress_start "Backing up old Ombi config and database"
+     mkdir -p /root/swizzin/backups/ombiv3
+diff panel.sh.orig panel.sh
+--- panel.sh.orig
++++ panel.sh
+@@ -2,7 +2,7 @@
+ # Temporary upgrade script for the panel until panel becomes more self-sufficient
+ 
+ if [[ -f /install/.panel.lock ]]; then
+-    if ! dpkg -s acl >/dev/null 2>&1; then
++    if ! dpkg -s acl > /dev/null 2>&1; then
+         echo_progress_start "Modifying ACLs for swizzin group to prevent panel issues"
+         apt_install acl
+         setfacl -m g:swizzin:rx /home/*
+@@ -9,20 +9,20 @@
+         echo_progress_done
+     fi
+     echo_progress_start "Downloading latest panel commits"
+-    sudo -u swizzin git -C /opt/swizzin pull >>${log} 2>&1 || { PANELRESET=1; }
++    sudo -u swizzin git -C /opt/swizzin pull >> ${log} 2>&1 || { PANELRESET=1; }
+     if [[ $PANELRESET == 1 ]]; then
+         echo_warn "Working around unclean git repo"
+-        sudo -u swizzin git -C /opt/swizzin fetch origin master >>${log} 2>&1
++        sudo -u swizzin git -C /opt/swizzin fetch origin master >> ${log} 2>&1
+         cp -a /opt/swizzin/core/custom /opt/swizzin/core/custom.tmp
+-        sudo -u swizzin git -C /opt/swizzin reset --hard origin/master >>${log} 2>&1
+-        mv /opt/swizzin/core/custom.tmp/* /opt/swizzin/core/custom/ >>${log} 2>&1
++        sudo -u swizzin git -C /opt/swizzin reset --hard origin/master >> ${log} 2>&1
++        mv /opt/swizzin/core/custom.tmp/* /opt/swizzin/core/custom/ >> ${log} 2>&1
+         rm -rf opt/swizzin/core/custom.tmp
+     fi
+     echo_progress_done "Commits pulled"
+     echo_progress_start "Checking pip for new panel dependencies"
+-    if ! /opt/.venv/swizzin/bin/python /opt/swizzin/tests/test_requirements.py >>${log} 2>&1; then
+-        /opt/.venv/swizzin/bin/pip install --upgrade pip wheel >>${log} 2>&1
+-        /opt/.venv/swizzin/bin/pip install -r /opt/swizzin/requirements.txt >>${log} 2>&1
++    if ! /opt/.venv/swizzin/bin/python /opt/swizzin/tests/test_requirements.py >> ${log} 2>&1; then
++        /opt/.venv/swizzin/bin/pip install --upgrade pip wheel >> ${log} 2>&1
++        /opt/.venv/swizzin/bin/pip install -r /opt/swizzin/requirements.txt >> ${log} 2>&1
+         chown -R swizzin: /opt/.venv/swizzin
+     fi
+     echo_progress_done "Depends up-to-date"
+diff plex.sh.orig plex.sh
+--- plex.sh.orig
++++ plex.sh
+@@ -8,7 +8,7 @@
+ fi
+ 
+ if [[ ! -f /opt/plexupdate/plexupdate.sh ]]; then
+-    user=$(cut -d: -f1 </root/.master.info)
++    user=$(cut -d: -f1 < /root/.master.info)
+     sudo -H -u $user bash -c "$(wget -qO - https://raw.githubusercontent.com/mrworf/plexupdate/master/extras/installer.sh)"
+ else
+     /opt/plexupdate/plexupdate.sh
+diff qbittorrent.sh.orig qbittorrent.sh
+--- qbittorrent.sh.orig
++++ qbittorrent.sh
+@@ -18,21 +18,21 @@
+ . /etc/swizzin/sources/functions/fpm
+ 
+ users=($(_get_user_list))
+-qbtvold=$(qbittorrent-nox --version 2>/dev/null | grep -oP '\d+\.\d+\.\d+' || echo '0.0.0.0')
++qbtvold=$(qbittorrent-nox --version 2> /dev/null | grep -oP '\d+\.\d+\.\d+' || echo '0.0.0.0')
+ 
+ whiptail_qbittorrent
+ 
+ case ${QBITTORRENT_VERSION} in
+-[Rr][Ee][Pp][Oo])
+-    apt_remove --purge qbittorrent-nox
+-    check_shared_libtorrent_rasterbar qbittorrent
+-    apt_install qbittorrent-nox
+-    ;;
+-*)
+-    detect_libtorrent_rasterbar_conflict qbittorrent
+-    qbittorrent_version_info
+-    install_fpm
+-    check_swap_on
++    [Rr][Ee][Pp][Oo])
++        apt_remove --purge qbittorrent-nox
++        check_shared_libtorrent_rasterbar qbittorrent
++        apt_install qbittorrent-nox
++        ;;
++    *)
++        detect_libtorrent_rasterbar_conflict qbittorrent
++        qbittorrent_version_info
++        install_fpm
++        check_swap_on
+ 
+         if ! skip_libtorrent_qbittorrent; then
+             echo_progress_start "Building libtorrent-rasterbar"
+@@ -46,7 +46,7 @@
+         check_swap_off
+         ;;
+ esac
+-qbtvnew=$(qbittorrent-nox --version 2>/dev/null | grep -oP '\d+\.\d+\.\d+')
++qbtvnew=$(qbittorrent-nox --version 2> /dev/null | grep -oP '\d+\.\d+\.\d+')
+ 
+ for user in "${users[@]}"; do
+     if dpkg --compare-versions ${qbtvold} lt 4.2.0 && dpkg --compare-versions ${qbtvnew} ge 4.2.0; then
+diff rtorrent.sh.orig rtorrent.sh
+--- rtorrent.sh.orig
++++ rtorrent.sh
+@@ -15,9 +15,9 @@
+ . /etc/swizzin/sources/functions/curl
+ whiptail_rtorrent
+ 
+-user=$(cut -d: -f1 </root/.master.info)
++user=$(cut -d: -f1 < /root/.master.info)
+ rutorrent="/srv/rutorrent/"
+-users=($(cut -d: -f1 </etc/htpasswd))
++users=($(cut -d: -f1 < /etc/htpasswd))
+ 
+ if [[ -n $noexec ]]; then
+     mount -o remount,exec /tmp
+diff sabnzbd.sh.orig sabnzbd.sh
+--- sabnzbd.sh.orig
++++ sabnzbd.sh
+@@ -1,5 +1,5 @@
+ #!/bin/bash
+-user=$(cut -d: -f1 </root/.master.info)
++user=$(cut -d: -f1 < /root/.master.info)
+ 
+ if [[ ! -f /install/.sabnzbd.lock ]]; then
+     echo_error "SABnzbd not detected. Exiting!"
+@@ -55,7 +55,7 @@
+     wget -q -O /tmp/sabnzbd.tar.gz "$latest"
+     rm -rf /opt/sabnzbd
+     mkdir -p /opt/sabnzbd
+-    tar xzf /tmp/sabnzbd.tar.gz --strip-components=1 -C /opt/sabnzbd >>"$log" 2>&1
++    tar xzf /tmp/sabnzbd.tar.gz --strip-components=1 -C /opt/sabnzbd >> "$log" 2>&1
+     chown -R ${user}: /opt/sabnzbd
+     echo_progress_done
+     if [[ -f /opt/.venv/sabnzbd/bin/python2 ]]; then
+@@ -74,8 +74,8 @@
+             sed -i 's/python2/python/g' /etc/systemd/system/sabnzbd.service
+             systemctl daemon-reload
+         fi
+-        sudo -u ${user} bash -c "/opt/.venv/sabnzbd/bin/pip install --upgrade pip wheel" >>"${log}" 2>&1
+-        sudo -u ${user} bash -c "/opt/.venv/sabnzbd/bin/pip install -r /opt/sabnzbd/requirements.txt" >>"$log" 2>&1
++        sudo -u ${user} bash -c "/opt/.venv/sabnzbd/bin/pip install --upgrade pip wheel" >> "${log}" 2>&1
++        sudo -u ${user} bash -c "/opt/.venv/sabnzbd/bin/pip install -r /opt/sabnzbd/requirements.txt" >> "$log" 2>&1
+         echo_progress_done
+     fi
+     rm /tmp/sabnzbd.tar.gz
+@@ -84,7 +84,7 @@
+     if [[ $latestversion =~ ^3\.0\.[1-2] ]]; then
+         sed -i "s/feedparser.*/feedparser<6.0.0/g" /opt/sabnzbd/requirements.txt
+     fi
+-    sudo -u ${user} bash -c "/opt/.venv/sabnzbd/bin/pip install -r /opt/sabnzbd/requirements.txt" >>"$log" 2>&1
++    sudo -u ${user} bash -c "/opt/.venv/sabnzbd/bin/pip install -r /opt/sabnzbd/requirements.txt" >> "$log" 2>&1
+     echo_progress_done
+     systemctl try-restart sabnzbd
+     echo_info "SABnzbd has been upgraded to version ${latestversion}!"

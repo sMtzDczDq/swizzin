@@ -73,84 +73,84 @@ _arch_check
 function _option_parse() {
     while test $# -gt 0; do
         case "$1" in
-        --user)
-            shift
-            user="$1"
-            echo_info "User = $user"
-            ;;
-        --pass | --password)
-            shift
-            pass="$1"
-            echo -e "\tPass = $pass" #Not an echo_info as we don't want this to hit the logs
-            ;;
-        --skip-cracklib)
-            if check_installed libpam-cracklib; then
-                echo_warn "Can't skip password check as libpam-cracklib is installed"
-            else
+            --user)
+                shift
+                user="$1"
+                echo_info "User = $user"
+                ;;
+            --pass | --password)
+                shift
+                pass="$1"
+                echo -e "\tPass = $pass" #Not an echo_info as we don't want this to hit the logs
+                ;;
+            --skip-cracklib)
+                if check_installed libpam-cracklib; then
+                    echo_warn "Can't skip password check as libpam-cracklib is installed"
+                else
+                    export SKIPCRACKLIB=true
+                    echo_info "Cracklib will be skipped"
+                fi
+                ;;
+            --domain)
+                shift
+                export LE_HOSTNAME="$1"
+                export LE_DEFAULTCONF=yes
+                export LE_BOOL_CF=no
+                echo_info "Domain = $LE_HOSTNAME, Used in default nginx config = $LE_DEFAULTCONF"
+                ;;
+            --local)
+                LOCAL=true
+                echo_info "Local = $LOCAL"
+                ;;
+            --test)
+                export test=true
+                echo_info "test = $test"
+                ;;
+            --rmgrsec)
+                rmgrsec=yes
+                echo_info "OVH Kernel nuke = $rmgrsec"
+                ;;
+            --env)
+                shift
+                if [[ ! -f $1 ]]; then
+                    echo_error "File does not exist"
+                    exit 1
+                fi
+                envfile="$1"
+                echo_info "Parsing env variables from $envfile:\n$(grep -v '^#' "$envfile")"
+
+                # anything which begins with a cap is exported
+                if grep -v '^#' "$envfile" | grep '^[A-Z]' -q; then
+                    export $(grep -v '^#' "$envfile" | grep '^[A-Z]' | tr '\n' ' ')
+                fi
+
+                # anything with a lowercase will get sourced
+                if grep -v '^#' "$envfile" | grep '^[a-z]' -q; then
+                    source <(grep -v '^#' "$envfile" | grep '^[a-z]') # | read -d $'\x04' name -
+                fi
+
+                # If packages were in env, make the installArray
+                if [[ -n $packages ]]; then
+                    readarray -td: installArray < <(printf '%s' "$packages")
+                fi
+                unattend=true
                 export SKIPCRACKLIB=true
-                echo_info "Cracklib will be skipped"
-            fi
-            ;;
-        --domain)
-            shift
-            export LE_HOSTNAME="$1"
-            export LE_DEFAULTCONF=yes
-            export LE_BOOL_CF=no
-            echo_info "Domain = $LE_HOSTNAME, Used in default nginx config = $LE_DEFAULTCONF"
-            ;;
-        --local)
-            LOCAL=true
-            echo_info "Local = $LOCAL"
-            ;;
-        --test)
-            export test=true
-            echo_info "test = $test"
-            ;;
-        --rmgrsec)
-            rmgrsec=yes
-            echo_info "OVH Kernel nuke = $rmgrsec"
-            ;;
-        --env)
-            shift
-            if [[ ! -f $1 ]]; then
-                echo_error "File does not exist"
+                ;;
+            --unattend)
+                unattend=true
+                ;;
+            --post-command)
+                shift
+                postcommand="$1"
+                echo_info "Post-install command = \"$postcommand\""
+                ;;
+            -*)
+                echo_error "Error: Invalid option: $1"
                 exit 1
-            fi
-            envfile="$1"
-            echo_info "Parsing env variables from $envfile:\n$(grep -v '^#' "$envfile")"
-
-            # anything which begins with a cap is exported
-            if grep -v '^#' "$envfile" | grep '^[A-Z]' -q; then
-                export $(grep -v '^#' "$envfile" | grep '^[A-Z]' | tr '\n' ' ')
-            fi
-
-            # anything with a lowercase will get sourced
-            if grep -v '^#' "$envfile" | grep '^[a-z]' -q; then
-                source <(grep -v '^#' "$envfile" | grep '^[a-z]') # | read -d $'\x04' name -
-            fi
-
-            # If packages were in env, make the installArray
-            if [[ -n $packages ]]; then
-                readarray -td: installArray < <(printf '%s' "$packages")
-            fi
-            unattend=true
-            export SKIPCRACKLIB=true
-            ;;
-        --unattend)
-            unattend=true
-            ;;
-        --post-command)
-            shift
-            postcommand="$1"
-            echo_info "Post-install command = \"$postcommand\""
-            ;;
-        -*)
-            echo_error "Error: Invalid option: $1"
-            exit 1
-            ;;
-        *)
-            installArray+=("$1")
-            ;;
+                ;;
+            *)
+                installArray+=("$1")
+                ;;
         esac
         shift
     done

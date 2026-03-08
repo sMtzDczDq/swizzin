@@ -3,13 +3,13 @@
 if [[ -f /install/.nzbhydra.lock ]]; then
     if [[ -f /etc/systemd/system/nzbhydra@.service ]]; then
         echo_progress_start "Updating NZBHydra to use a venv"
-        user=$(cut -d: -f1 </root/.master.info)
+        user=$(cut -d: -f1 < /root/.master.info)
         codename=$(lsb_release -cs)
         active=$(systemctl is-active nzbhydra@${user})
         #shellcheck source=sources/functions/pyenv
         . /etc/swizzin/sources/functions/pyenv
         if [[ $active == "active" ]]; then
-            systemctl disable -q --now nzbhydra@${user} >>${log} 2>&1
+            systemctl disable -q --now nzbhydra@${user} >> ${log} 2>&1
         fi
 
         if [[ $codename = "buster" ]]; then
@@ -33,7 +33,7 @@ if [[ -f /install/.nzbhydra.lock ]]; then
 
         mv /home/${user}/.nzbhydra /home/${user}/.config/nzbhydra
         mv /home/${user}/nzbhydra /opt
-        cat >/etc/systemd/system/nzbhydra.service <<NZBH
+        cat > /etc/systemd/system/nzbhydra.service << NZBH
 [Unit]
 Description=NZBHydra
 Documentation=https://github.com/theotherp/nzbhydra

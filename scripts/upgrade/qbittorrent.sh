@@ -18,21 +18,21 @@ fi
 . /etc/swizzin/sources/functions/fpm
 
 users=($(_get_user_list))
-qbtvold=$(qbittorrent-nox --version 2>/dev/null | grep -oP '\d+\.\d+\.\d+' || echo '0.0.0.0')
+qbtvold=$(qbittorrent-nox --version 2> /dev/null | grep -oP '\d+\.\d+\.\d+' || echo '0.0.0.0')
 
 whiptail_qbittorrent
 
 case ${QBITTORRENT_VERSION} in
-[Rr][Ee][Pp][Oo])
-    apt_remove --purge qbittorrent-nox
-    check_shared_libtorrent_rasterbar qbittorrent
-    apt_install qbittorrent-nox
-    ;;
-*)
-    detect_libtorrent_rasterbar_conflict qbittorrent
-    qbittorrent_version_info
-    install_fpm
-    check_swap_on
+    [Rr][Ee][Pp][Oo])
+        apt_remove --purge qbittorrent-nox
+        check_shared_libtorrent_rasterbar qbittorrent
+        apt_install qbittorrent-nox
+        ;;
+    *)
+        detect_libtorrent_rasterbar_conflict qbittorrent
+        qbittorrent_version_info
+        install_fpm
+        check_swap_on
 
         if ! skip_libtorrent_qbittorrent; then
             echo_progress_start "Building libtorrent-rasterbar"
@@ -46,7 +46,7 @@ case ${QBITTORRENT_VERSION} in
         check_swap_off
         ;;
 esac
-qbtvnew=$(qbittorrent-nox --version 2>/dev/null | grep -oP '\d+\.\d+\.\d+')
+qbtvnew=$(qbittorrent-nox --version 2> /dev/null | grep -oP '\d+\.\d+\.\d+')
 
 for user in "${users[@]}"; do
     if dpkg --compare-versions ${qbtvold} lt 4.2.0 && dpkg --compare-versions ${qbtvnew} ge 4.2.0; then

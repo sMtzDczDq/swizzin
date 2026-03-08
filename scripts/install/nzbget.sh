@@ -18,7 +18,7 @@ function _install() {
     cd /tmp
     for u in "${users[@]}"; do
         echo_progress_start "Installing nzbget for $u"
-        sh nzbget-latest-bin-linux.run --destdir /home/$u/nzbget >>$log 2>&1
+        sh nzbget-latest-bin-linux.run --destdir /home/$u/nzbget >> $log 2>&1
         chown -R $u:$u /home/$u/nzbget
         if [[ $u == $master ]]; then
             :

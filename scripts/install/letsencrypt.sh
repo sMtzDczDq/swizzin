@@ -25,13 +25,13 @@ read -e hostname
 echo_query "Do you want to apply this certificate to your swizzin default conf?" "y/n"
 read yn
 case $yn in
-[Yy])
-    main=yes
-    ;;
-[Nn])
-    main=no
-    ;;
-*) echo_warn "Please answer (y)es or (n)o." ;;
+    [Yy])
+        main=yes
+        ;;
+    [Nn])
+        main=no
+        ;;
+    *) echo_warn "Please answer (y)es or (n)o." ;;
 esac
 
 if [[ $main == yes ]]; then
@@ -41,13 +41,13 @@ fi
 echo_query "Is your DNS managed by CloudFlare?" "y/n"
 read yn
 case $yn in
-[Yy])
-    cf=yes
-    ;;
-[Nn])
-    cf=no
-    ;;
-*) echo_warn "Please answer (y)es or (n)o." ;;
+    [Yy])
+        cf=yes
+        ;;
+    [Nn])
+        cf=no
+        ;;
+    *) echo_warn "Please answer (y)es or (n)o." ;;
 esac
 
 if [[ ${cf} == yes ]]; then
@@ -60,15 +60,15 @@ if [[ ${cf} == yes ]]; then
     echo_query "Does the record for this subdomain already exist?" "y/n"
     read yn
     case $yn in
-    [Yy])
-        record=yes
-        ;;
-    [Nn])
-        record=no
-        ;;
-    *)
-        echo_warn "Please answer (y)es or (n)o."
-        ;;
+        [Yy])
+            record=yes
+            ;;
+        [Nn])
+            record=no
+            ;;
+        *)
+            echo_warn "Please answer (y)es or (n)o."
+            ;;
     esac
 
     echo_query "Enter CF API key"
@@ -107,7 +107,7 @@ apt_install socat
 
 if [[ ! -f /root/.acme.sh/acme.sh ]]; then
     echo_progress_start "Installing ACME script"
-    curl https://get.acme.sh | sh >>$log 2>&1
+    curl https://get.acme.sh | sh >> $log 2>&1
     echo_progress_done
 fi
 
@@ -116,19 +116,19 @@ chmod 700 /etc/nginx/ssl
 
 echo_progress_start "Registering certificates"
 if [[ ${cf} == yes ]]; then
-    /root/.acme.sh/acme.sh --force --issue --dns dns_cf -d ${hostname} >>$log 2>&1 || {
+    /root/.acme.sh/acme.sh --force --issue --dns dns_cf -d ${hostname} >> $log 2>&1 || {
         echo_error "Certificate could not be issued."
         exit 1
     }
 else
     if [[ $main = yes ]]; then
-        /root/.acme.sh/acme.sh --force --issue --nginx -d ${hostname} >>$log 2>&1 || {
+        /root/.acme.sh/acme.sh --force --issue --nginx -d ${hostname} >> $log 2>&1 || {
             echo_error "Certificate could not be issued."
             exit 1
         }
     else
         systemctl stop nginx
-        /root/.acme.sh/acme.sh --force --issue --standalone -d ${hostname} --pre-hook "systemctl stop nginx" --post-hook "systemctl start nginx" >>$log 2>&1 || {
+        /root/.acme.sh/acme.sh --force --issue --standalone -d ${hostname} --pre-hook "systemctl stop nginx" --post-hook "systemctl start nginx" >> $log 2>&1 || {
             echo_error "Certificate could not be issued. Please check your info and try again"
             exit 1
         }
